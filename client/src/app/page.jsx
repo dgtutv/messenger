@@ -7,8 +7,13 @@ const socket = io.connect("http://localhost:8080"); //Change to actual URL when 
 
 function page() {
   const [message, setMessage] = useState("");
-  const [messageReceived, setMessageReceived] = useState("");
+  const [messageReceived, setMessageReceived] = useState({
+    user: "",
+    message: "",
+    timestamp: ""
+  });
   const [room, setRoom] = useState("");
+  const [username, setUsername] = useState("");
 
   const joinRoom = () => {
     if (room !== "") {
@@ -21,24 +26,26 @@ function page() {
       response => response.json()
     ).then(
       data => {
-        setMessageReceived(data.message);
+        setMessageReceived({ user: data.user, message: data.message, timestamp: data.timestamp });
       }
     )
   }, []);
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      setMessageReceived(data.message);
+      setMessageReceived({ user: data.user, message: data.message, timestamp: data.timestamp });
     });
   }, [socket]);
 
   const sendMessage = () => {
-    socket.emit("send_message", { message, room });
+    socket.emit("send_message", { message, room, user: username, timestamp: Date.now() });
   }
 
   return (
     <div>
-      <p>{messageReceived}</p>
+      <input type="text" placeholder='Username' onChange={(event) => {
+        setUsername(event.target.value);
+      }} />
       <input type="text" placeholder='Room ID' onChange={(event) => {
         setRoom(event.target.value);
       }} />
@@ -47,6 +54,10 @@ function page() {
         setMessage(event.target.value);
       }} />
       <button onClick={sendMessage}>Send Message</button>
+
+      <p><b>{messageReceived.user}</b></p>
+      <p>{messageReceived.message}</p>
+      <p><i>{messageReceived.timestamp ? new Date(messageReceived.timestamp).toLocaleString() : ""}</i></p>
     </div>
   )
 }
