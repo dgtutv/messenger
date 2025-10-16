@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const LoginCard = () => {
     const [email, setEmail] = useState("");
@@ -100,6 +101,7 @@ const LoginCard = () => {
                 {error && (
                     <Typography color="error" variant="body2">{error}</Typography>
                 )}
+                <Link href="/register" style={{ cursor: "pointer", alignSelf: "flex-start", textDecoration: "underline", color: "#3d4246ff" }} >Reset your password</Link>
                 <Button type='submit' style={formControlStyle} variant="contained">Sign in</Button>
             </form>
         </Box>
