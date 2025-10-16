@@ -2,35 +2,31 @@
 
 import VerifyResetCard from "../layouts/components/verify-reset-card";
 import React from 'react'
-import { Typography } from "@mui/material";
-import { useTheme } from '../contexts/ThemeContext';
+import { Typography, Box } from "@mui/material";
 
 const VerifyReset = () => {
-    const { getThemeColors } = useTheme();
-    const themeColors = getThemeColors();
-
-    const mainStyle = {
-        background: themeColors.bgColor,
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        gap: "40px",
-        padding: "20px",
-        textAlign: "center"
-    }
-
     return (
-        <div style={mainStyle}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start" }}>
-                <Typography variant='h4' sx={{ color: themeColors.textColor }}>Verify Reset Code</Typography>
-                <Typography variant="subtitle1" sx={{ color: themeColors.textColor, opacity: 0.7 }}>
+        <Box
+            sx={{
+                bgcolor: 'background.default',
+                minHeight: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                gap: "40px",
+                padding: "20px",
+                textAlign: "center"
+            }}
+        >
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start" }}>
+                <Typography variant='h4' color="text.primary">Verify Reset Code</Typography>
+                <Typography variant="subtitle1" color="text.secondary">
                     Enter the verification code sent to your email
                 </Typography>
-            </div>
+            </Box>
             <VerifyResetCard />
-        </div>
+        </Box>
     )
 }
 

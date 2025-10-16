@@ -1,73 +1,113 @@
 import { useState } from 'react';
 import "./layout.css"
-import { IconButton, Drawer } from "@mui/material";
+import { IconButton, Drawer, Button, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
-    const { isMobile, getThemeColors } = useTheme();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const themeColors = getThemeColors();
-
-
-    //MUI element stylings
-    const hamburgerMenuStyle = {
-        zIndex: 1300,
-        color: themeColors.textColor,
-    }
-
-    const drawerStyle = {
-        "& .MuiDrawer-paper": {
-            width: "320px",
-            maxWidth: "50vw",
-            padding: "16px",
-            backgroundColor: themeColors.headerBg,
-            borderRight: `1px solid ${themeColors.borderColor}`,
-            color: themeColors.textColor,
-        },
-    }
+    const router = useRouter();
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
     };
 
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/api/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                router.push('/sign-in');
+            }
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
+
     return (
         <>
             {isMobile ? (
-                <header style={{ backgroundColor: themeColors.headerBg, color: themeColors.textColor }}>
+                <Box
+                    component="header"
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem 2rem',
+                        bgcolor: 'background.paper',
+                        boxShadow: 1,
+                        margin: 0,
+                    }}
+                >
                     <Drawer
                         anchor="left"
                         open={mobileMenuOpen}
                         onClose={toggleMobileMenu}
-                        sx={drawerStyle}
+                        sx={{
+                            "& .MuiDrawer-paper": {
+                                width: "320px",
+                                maxWidth: "50vw",
+                                padding: "16px",
+                                bgcolor: 'background.paper',
+                                borderRight: 1,
+                                borderColor: 'divider',
+                            },
+                        }}
                     >
+                        <Button
+                            onClick={handleLogout}
+                            sx={{
+                                color: 'text.primary',
+                                textTransform: 'none',
+                                justifyContent: 'flex-start',
+                                padding: '8px 16px'
+                            }}
+                        >
+                            Logout
+                        </Button>
                     </Drawer>
-                    <h1 style={{ color: themeColors.textColor }}>
+                    <Typography variant="h5" component="h1" color="text.primary">
                         Messenger
-                    </h1>
+                    </Typography>
                     <IconButton
-                        sx={hamburgerMenuStyle}
+                        sx={{ zIndex: 1300, color: 'text.primary' }}
                         onClick={toggleMobileMenu}
                         aria-label="open menu"
                     >
                         <MenuIcon />
                     </IconButton>
-                </header>
+                </Box>
 
             ) : (
-                <header style={{ backgroundColor: themeColors.headerBg, color: themeColors.textColor }}>
-                    <h1 style={{ color: themeColors.textColor }}>
+                <Box
+                    component="header"
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem 2rem',
+                        bgcolor: 'background.paper',
+                        boxShadow: 1,
+                        margin: 0,
+                    }}
+                >
+                    <Typography variant="h5" component="h1" color="text.primary">
                         Messenger
-                    </h1>
-                    <nav>
-                    </nav>
-                </header>
+                    </Typography>
+                    <Box component="nav">
+                        <Button variant='contained' onClick={handleLogout}>
+                            Sign out
+                        </Button>
+                    </Box>
+                </Box>
             )
             }
         </>
-
-
-
     );
 };
 
