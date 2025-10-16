@@ -25,6 +25,11 @@ const app = () => {
         </div>
       </div>
       <LoginCard />
+      <div>
+        <Typography variant="body2">
+          <Link href="/reset-password" style={{ cursor: "pointer" }} color="#3e4347">Forgot your password?</Link>
+        </Typography>
+      </div>
     </div>
   )
 }

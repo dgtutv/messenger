@@ -1,9 +1,9 @@
-import VerifyEmailCard from "../components/verify-email-card";
+import ResetPasswordCard from "../components/reset-password-card";
 import React from 'react'
 import { Typography, Link as MuiLink } from "@mui/material";
 import Link from "next/link";
 
-const VerifyEmail = () => {
+const ResetPassword = () => {
     const mainStyle = {
         background: "#f9fafc",
         minHeight: "100vh",
@@ -19,18 +19,18 @@ const VerifyEmail = () => {
     return (
         <div style={mainStyle}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start" }}>
-                <Typography variant='h4' color="#3e4347">Verify Your Email</Typography>
+                <Typography variant='h4' color="#3e4347">Reset Password</Typography>
                 <div>
                     <Typography variant="subtitle1">
-                        Already verified? <MuiLink component={Link} href="/sign-in" style={{ cursor: "pointer" }} color="#3e4347">
+                        Remember your password? <MuiLink component={Link} href="/sign-in" style={{ cursor: "pointer" }} color="#3e4347">
                             Sign in
                         </MuiLink>
                     </Typography>
                 </div>
             </div>
-            <VerifyEmailCard />
+            <ResetPasswordCard />
         </div>
     )
 }
 
-export default VerifyEmail
+export default ResetPassword

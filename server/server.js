@@ -67,10 +67,15 @@ passport.deserializeUser(async (id, done) => {
     try {
         const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
         const user = rows[0];
+        
+        if (!user) {
+            return done(null, false);
+        }
 
         done(null, user);
     } catch (err) {
-        done(err);
+        console.error('Deserialize error:', err);
+        done(err, null);
     }
 });
 
@@ -188,6 +193,137 @@ app.post("/api/register", async (req, res) => {
         res.status(500).json({ error: "Registration failed. Please try again." });
     }
 });
+
+// Request password reset (send verification code)
+app.post("/api/request-password-reset", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+        // Check if user exists
+        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        if (existingUser.rows.length < 1) {
+            return res.status(400).json({ error: "Email not registered" });
+        }
+
+        const user = existingUser.rows[0];
+
+        // Generate verification code
+        const verificationCode = generateVerificationCode();
+        const codeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+        // Store verification code for password reset
+        await pool.query(
+            "UPDATE users SET verification_code = $1, verification_code_expires = $2 WHERE email = $3",
+            [verificationCode, codeExpires, email]
+        );
+
+        // Send verification email
+        const emailResult = await sendVerificationEmail(email, user.name, verificationCode);
+
+        if (!emailResult.success) {
+            return res.status(500).json({ error: "Failed to send verification email" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset code sent. Please check your email.",
+            email: email
+        });
+    } catch (error) {
+        console.error('Password reset request error:', error);
+        res.status(500).json({ error: "Failed to send reset code. Please try again." });
+    }
+});
+
+// Verify reset code
+app.post("/api/verify-reset-code", async (req, res) => {
+    try {
+        const { email, code } = req.body;
+
+        if (!email || !code) {
+            return res.status(400).json({ error: "Email and code are required" });
+        }
+
+        // Find user with matching email and code
+        const result = await pool.query(
+            "SELECT * FROM users WHERE email = $1 AND verification_code = $2",
+            [email, code]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid verification code" });
+        }
+
+        const user = result.rows[0];
+
+        // Check if code has expired
+        if (new Date() > new Date(user.verification_code_expires)) {
+            return res.status(400).json({ error: "Verification code has expired" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Code verified. You can now reset your password."
+        });
+    } catch (error) {
+        console.error('Verification error:', error);
+        res.status(500).json({ error: "Verification failed. Please try again." });
+    }
+});
+
+// Reset password (after code verification)
+app.post("/api/reset-password", async (req, res) => {
+    try {
+        const { email, code, newPassword } = req.body;
+
+        if (!email || !code || !newPassword) {
+            return res.status(400).json({ error: "Email, code, and new password are required" });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ error: "Password must be at least 8 characters" });
+        }
+
+        // Verify code again
+        const result = await pool.query(
+            "SELECT * FROM users WHERE email = $1 AND verification_code = $2",
+            [email, code]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid verification code" });
+        }
+
+        const user = result.rows[0];
+
+        // Check if code has expired
+        if (new Date() > new Date(user.verification_code_expires)) {
+            return res.status(400).json({ error: "Verification code has expired" });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password and clear verification code
+        await pool.query(
+            "UPDATE users SET password = $1, verification_code = NULL, verification_code_expires = NULL WHERE email = $2",
+            [hashedPassword, email]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successfully. You can now log in with your new password."
+        });
+    } catch (error) {
+        console.error('Password reset error:', error);
+        res.status(500).json({ error: "Password reset failed. Please try again." });
+    }
+});
+
 
 // Verify email code
 app.post("/api/verify-email", async (req, res) => {

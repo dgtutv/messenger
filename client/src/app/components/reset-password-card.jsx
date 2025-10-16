@@ -2,12 +2,11 @@
 import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
-const LoginCard = () => {
+const ResetPasswordCard = () => {
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const mainStyle = {
@@ -36,81 +35,77 @@ const LoginCard = () => {
 
     const formControlStyle = {
         width: "100%",
-
     }
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setError(""); // Clear previous errors
+        setError("");
+        setIsLoading(true);
 
-        // Basic validation
-        if (!email || !password) {
-            setError("Please fill in all fields");
+        if (!email) {
+            setError("Please enter your email");
+            setIsLoading(false);
             return;
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/login', {
+            const response = await fetch('http://localhost:8080/api/request-password-reset', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
-                credentials: 'include'  // ← Send and save cookies
+                body: JSON.stringify({ email }),
+                credentials: 'include'
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Clear form
-                setEmail("");
-                setPassword("");
-
-                // Redirect to home
-                router.push('/');
-            }
-            else {
-                // Check if error is about email verification
-                if (data.error && data.error.includes("verify your email")) {
-                    // Redirect to verification page with email
-                    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
-                } else {
-                    setError(data.error || "Login failed. Please try again.");
-                }
+                // Redirect to verification page with email and reset context
+                router.push(`/verify-reset?email=${encodeURIComponent(email)}`);
+            } else {
+                setError(data.error || "Failed to send reset code. Please try again.");
             }
         } catch (error) {
             console.error('Error:', error);
-            setError("Login failed. Please try again.");
+            setError("Failed to send reset code. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <Box style={mainStyle}>
+            <Typography variant="h5" align="center" gutterBottom>
+                Reset Password
+            </Typography>
+            <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 2 }}>
+                Enter your email address and we'll send you a verification code
+            </Typography>
             <form onSubmit={handleSubmit} style={formStyle}>
                 <TextField
                     required
                     type='email'
                     style={formControlStyle}
-                    onChange={(event) => { setEmail(event.target.value) }}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     label="Email address"
                     variant='outlined'
-                />
-                <TextField
-                    required
-                    style={formControlStyle}
-                    onChange={(event) => { setPassword(event.target.value) }}
-                    label="Password"
-                    variant='outlined'
-                    type="password"
-                    autoComplete='current-password'
                 />
                 {error && (
                     <Typography color="error" variant="body2">{error}</Typography>
                 )}
-                <Button type='submit' style={formControlStyle} variant="contained">Sign in</Button>
+                <Button
+                    type='submit'
+                    style={formControlStyle}
+                    variant="contained"
+                    disabled={isLoading}
+                >
+                    {isLoading ? "Sending..." : "Send Reset Code"}
+                </Button>
             </form>
         </Box>
     )
 }
 
-export default LoginCard;
+export default ResetPasswordCard;

@@ -10,7 +10,7 @@ function generateVerificationCode() {
 async function sendVerificationEmail(email, name, code) {
     const msg = {
         to: email,
-        from: process.env.SENDGRID_FROM_EMAIL, // Add this to your .env
+        from: process.env.SENDGRID_FROM_EMAIL,
         subject: 'Verify Your Email - Messenger App',
         text: `Hi ${name}, Your verification code is: ${code}. This code will expire in 10 minutes.`,
         html: `
