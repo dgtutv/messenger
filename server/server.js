@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 //Required for database
 const { Pool } = require("pg");
 const session = require("express-session");
+const pgSession = require('connect-pg-simple')(session);
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 require('dotenv').config();
@@ -72,14 +73,56 @@ const io = new Server(server, {
     cors: {
         origin: "http://localhost:3000",    //Set to react origin when deploying
         methods: ["GET", "POST"],
+        credentials: true
     }
-})
+});
+
+
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}));
+app.use(express.json());
+
+// Session middleware with PostgreSQL store
+const sessionMiddleware = session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session',
+        createTableIfMissing: true
+    }),
+    secret: process.env.SESSION_SECRET || "cats",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        httpOnly: true,                    // Prevents client JS from reading cookie
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    }
+});
+
+
+io.engine.use(sessionMiddleware);
+
+io.use((socket, next) => {
+    const session = socket.request.session;
+    if (session && session.passport && session.passport.user) {
+        // User is authenticated - attach userId to socket
+        socket.userId = session.passport.user;
+        next();
+    } else {
+        // User is not authenticated - reject connection
+        next(new Error("unauthenticated"));
+    }
+});
 
 io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id}`);
+    console.log(`User connected: ${socket.id}, userId: ${socket.userId}`);
 
     socket.on("join_room", (data) => {  //Change to check if room exists, if not add to db
         socket.join(data);
+        console.log(`User ${socket.userId} joined room: ${data}`);
     })
 
     socket.on("send_message", (data) => {
@@ -87,10 +130,8 @@ io.on("connection", (socket) => {
     });
 });
 
-app.use(cors());
-app.use(express.json());
-
-app.use(session({ secret: "cats", resave: false, saveUninitialized: false }));
+app.use(sessionMiddleware);
+app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 

@@ -55,6 +55,7 @@ const LoginCard = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password }),
+                credentials: 'include'  // ← Send and save cookies
             });
 
             const data = await response.json();
@@ -64,7 +65,7 @@ const LoginCard = () => {
                 setEmail("");
                 setPassword("");
 
-                // Redirect to login
+                // Redirect to home
                 router.push('/');
             }
             else {

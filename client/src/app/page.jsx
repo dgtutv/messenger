@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { io } from 'socket.io-client';
+import { useRouter } from 'next/navigation';
 
-const socket = io.connect("http://localhost:8080"); //Change to actual URL when deploying
+let socket;
 
-function page() {
+function Page() {
   const [message, setMessage] = useState("");
   const [messageReceived, setMessageReceived] = useState({
     user: "",
@@ -13,46 +14,96 @@ function page() {
     timestamp: ""
   });
   const [room, setRoom] = useState("");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   const joinRoom = () => {
-    if (room !== "") {
+    if (room !== "" && socket) {
       socket.emit("join_room", room);
     }
   }
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/home").then(
-      response => response.json()
-    ).then(
-      data => {
-        setMessageReceived({ user: data.user, message: data.message, timestamp: data.timestamp });
-      }
-    )
-  }, []);
+    // Initialize socket connection with credentials
+    socket = io("http://localhost:8080", {
+      withCredentials: true
+    });
 
-  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+    });
+
     socket.on("receive_message", (data) => {
       setMessageReceived({ user: data.user, message: data.message, timestamp: data.timestamp });
     });
-  }, [socket]);
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error.message);
+    });
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Fetch user data
+    fetch("http://localhost:8080/api/user", {
+      credentials: 'include'
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Not authenticated');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setEmail(data.user.email);
+        setName(data.user.name);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('Failed to fetch user:', error);
+        setIsLoading(false);
+        // Only redirect on client side
+        if (typeof window !== 'undefined') {
+          router.push('/sign-in');
+        }
+      });
+  }, [router]);
 
   const sendMessage = () => {
-    socket.emit("send_message", { message, room, user: username, timestamp: Date.now() });
+    if (socket && message && room) {
+      socket.emit("send_message", { message, room, user: email, timestamp: Date.now() });
+      setMessage(""); // Clear input after sending
+    }
+  }
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <input type="text" placeholder='Username' onChange={(event) => {
-        setUsername(event.target.value);
-      }} />
-      <input type="text" placeholder='Room ID' onChange={(event) => {
-        setRoom(event.target.value);
-      }} />
+      <h2>Welcome, {name}</h2>
+      <input
+        type="text"
+        placeholder='Room ID'
+        value={room}
+        onChange={(event) => setRoom(event.target.value)}
+      />
       <button onClick={joinRoom}>Join</button>
-      <input type="text" placeholder='Message...' onChange={(event) => {
-        setMessage(event.target.value);
-      }} />
+      <input
+        type="text"
+        placeholder='Message...'
+        value={message}
+        onChange={(event) => setMessage(event.target.value)}
+      />
       <button onClick={sendMessage}>Send Message</button>
 
       <p><b>{messageReceived.user}</b></p>
@@ -62,4 +113,4 @@ function page() {
   )
 }
 
-export default page
+export default Page
