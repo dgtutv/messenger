@@ -10,3 +10,11 @@ CREATE TABLE users(
     verification_code VARCHAR(6),
     verification_code_expires TIMESTAMP
 );
+
+CREATE TABLE messages(
+    id SERIAL PRIMARY KEY,
+    sender_email VARCHAR(255) NOT NULL,
+    time_sent TIMESTAMP,
+    conversationID INT NOT NULL,
+    content TEXT
+);

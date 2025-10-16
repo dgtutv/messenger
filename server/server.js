@@ -67,7 +67,7 @@ passport.deserializeUser(async (id, done) => {
     try {
         const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
         const user = rows[0];
-        
+
         if (!user) {
             return done(null, false);
         }
@@ -139,8 +139,13 @@ io.on("connection", (socket) => {
         console.log(`User ${socket.userId} joined room: ${data}`);
     })
 
-    socket.on("send_message", (data) => {
+    socket.on("send_message", async (data) => {
         socket.to(data.room).emit("receive_message", data);
+        // Convert JavaScript timestamp (milliseconds) to PostgreSQL timestamp
+        const timestamp = new Date(data.timestamp);
+        await pool.query("INSERT INTO messages (sender_email, content, time_sent, conversationID) VALUES ($1, $2, $3, $4)",
+            [data.user, data.message, timestamp, data.room]
+        );
     });
 });
 
