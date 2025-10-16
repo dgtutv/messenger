@@ -1,11 +1,13 @@
 "use client"
 import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
+import { useRouter } from 'next/navigation'
 
 const LoginCard = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const mainStyle = {
         background: "white",
@@ -48,7 +50,7 @@ const LoginCard = () => {
 
         try {
             const response = await fetch('http://localhost:8080/api/login', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -57,13 +59,17 @@ const LoginCard = () => {
 
             const data = await response.json();
 
-            if (!response.ok) {
-                setError(data.error || "Login failed. Please try again.");
-                return;
-            }
+            if (response.ok) {
+                // Clear form
+                setEmail("");
+                setPassword("");
 
-            console.log('Success:', data);
-            // Handle success (e.g., redirect to dashboard, store token)
+                // Redirect to login
+                router.push('/');
+            }
+            else {
+                setError(data.message || "Login failed. Please try again.");
+            }
         } catch (error) {
             console.error('Error:', error);
             setError("Login failed. Please try again.");

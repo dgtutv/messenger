@@ -26,24 +26,27 @@ const pool = new Pool({
 });
 
 passport.use(
-    new LocalStrategy(async (email, password, done) => {
-        try {
-            const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-            const user = rows[0];
+    new LocalStrategy(
+        { usernameField: 'email' },
+        async (email, password, done) => {
+            try {
+                const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+                const user = rows[0];
 
-            if (!user) {
-                return done(null, false, { message: "Incorrect email" });
+                if (!user) {
+                    return done(null, false, { message: "Incorrect email" });
+                }
+                const match = await bcrypt.compare(password, user.password);
+                if (!match) {
+                    // passwords do not match!
+                    return done(null, false, { message: "Incorrect password" })
+                }
+                return done(null, user);
+            } catch (err) {
+                return done(err);
             }
-            const match = await bcrypt.compare(password, user.password);
-            if (!match) {
-                // passwords do not match!
-                return done(null, false, { message: "Incorrect password" })
-            }
-            return done(null, user);
-        } catch (err) {
-            return done(err);
         }
-    })
+    )
 );
 
 passport.serializeUser((user, done) => {
@@ -103,6 +106,57 @@ app.post("/api/register", async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Registration failed. Please try again." });
+    }
+});
+
+app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+        if (err) {
+            return res.status(500).json({ error: "Internal server error" });
+        }
+        if (!user) {
+            return res.status(401).json({ error: info.message || "Invalid credentials" });
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                return res.status(500).json({ error: "Login failed" });
+            }
+            // Send user data (excluding password)
+            return res.status(200).json({
+                success: true,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
+                }
+            });
+        });
+    })(req, res, next);
+});
+
+// Add logout endpoint
+app.post("/api/logout", (req, res) => {
+    req.logout((err) => {
+        if (err) {
+            return res.status(500).json({ error: "Logout failed" });
+        }
+        res.status(200).json({ success: true, message: "Logged out successfully" });
+    });
+});
+
+// Add endpoint to check if user is authenticated
+app.get("/api/user", (req, res) => {
+    if (req.isAuthenticated()) {
+        res.status(200).json({
+            authenticated: true,
+            user: {
+                id: req.user.id,
+                name: req.user.name,
+                email: req.user.email
+            }
+        });
+    } else {
+        res.status(401).json({ authenticated: false });
     }
 });
 
