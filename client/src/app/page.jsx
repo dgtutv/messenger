@@ -9,21 +9,15 @@ let socket;
 function Page() {
   const [message, setMessage] = useState("");
   const [messageReceived, setMessageReceived] = useState({
-    user: "",
+    senderEmail: "",
     message: "",
     timestamp: ""
   });
-  const [room, setRoom] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-
-  const joinRoom = () => {
-    if (room !== "" && socket) {
-      socket.emit("join_room", room);
-    }
-  }
 
   useEffect(() => {
     // Initialize socket connection with credentials
@@ -36,7 +30,7 @@ function Page() {
     });
 
     socket.on("receive_message", (data) => {
-      setMessageReceived({ user: data.user, message: data.message, timestamp: data.timestamp });
+      setMessageReceived({ senderEmail: data.senderEmail, message: data.message, timestamp: data.timestamp });
     });
 
     socket.on("connect_error", (error) => {
@@ -62,9 +56,15 @@ function Page() {
         return response.json();
       })
       .then(data => {
-        setEmail(data.user.email);
+        const userEmail = data.user.email;
+        setEmail(userEmail);
         setName(data.user.name);
         setIsLoading(false);
+
+        // Register user for direct messaging
+        if (socket) {
+          socket.emit("register_user", userEmail);
+        }
       })
       .catch(error => {
         console.error('Failed to fetch user:', error);
@@ -77,8 +77,13 @@ function Page() {
   }, [router]);
 
   const sendMessage = () => {
-    if (socket && message && room) {
-      socket.emit("send_message", { message, room, user: email, timestamp: Date.now() });
+    if (socket && message && recipientEmail) {
+      socket.emit("send_message", {
+        message,
+        senderEmail: email,
+        recipientEmail: recipientEmail,
+        timestamp: Date.now()
+      });
       setMessage(""); // Clear input after sending
     }
   }
@@ -91,24 +96,33 @@ function Page() {
   return (
     <div>
       <h2>Welcome, {name}</h2>
-      <input
-        type="text"
-        placeholder='Room ID'
-        value={room}
-        onChange={(event) => setRoom(event.target.value)}
-      />
-      <button onClick={joinRoom}>Join</button>
-      <input
-        type="text"
-        placeholder='Message...'
-        value={message}
-        onChange={(event) => setMessage(event.target.value)}
-      />
-      <button onClick={sendMessage}>Send Message</button>
+      <p>Your email: {email}</p>
 
-      <p><b>{messageReceived.user}</b></p>
-      <p>{messageReceived.message}</p>
-      <p><i>{messageReceived.timestamp ? new Date(messageReceived.timestamp).toLocaleString() : ""}</i></p>
+      <div>
+        <input
+          type="email"
+          placeholder='Recipient Email'
+          value={recipientEmail}
+          onChange={(event) => setRecipientEmail(event.target.value)}
+        />
+        <button onClick={() => setRecipientEmail(recipientEmail)}>Set Recipient</button>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder='Message...'
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+        />
+        <button onClick={sendMessage}>Send Message</button>
+      </div>
+
+      <div>
+        <p><b>From: {messageReceived.senderEmail}</b></p>
+        <p>{messageReceived.message}</p>
+        <p><i>{messageReceived.timestamp ? new Date(messageReceived.timestamp).toLocaleString() : ""}</i></p>
+      </div>
     </div>
   )
 }

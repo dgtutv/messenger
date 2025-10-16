@@ -134,17 +134,27 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}, userId: ${socket.userId}`);
 
-    socket.on("join_room", (data) => {  //Change to check if room exists, if not add to db
-        socket.join(data);
-        console.log(`User ${socket.userId} joined room: ${data}`);
-    })
+    // Store socket by user email for direct messaging
+    socket.on("register_user", (email) => {
+        socket.userEmail = email;
+        socket.join(email); // Join a room with their email
+        console.log(`User ${email} registered for direct messages`);
+    });
 
     socket.on("send_message", async (data) => {
-        socket.to(data.room).emit("receive_message", data);
         // Convert JavaScript timestamp (milliseconds) to PostgreSQL timestamp
         const timestamp = new Date(data.timestamp);
-        await pool.query("INSERT INTO messages (sender_email, content, time_sent, conversationID) VALUES ($1, $2, $3, $4)",
-            [data.user, data.message, timestamp, data.room]
+
+        // Emit to recipient
+        socket.to(data.recipientEmail).emit("receive_message", {
+            senderEmail: data.senderEmail,
+            message: data.message,
+            timestamp: data.timestamp
+        });
+
+        // Save to database with sender and recipient emails
+        await pool.query("INSERT INTO messages (sender_email, recipient_email, content, time_sent) VALUES ($1, $2, $3, $4)",
+            [data.senderEmail, data.recipientEmail, data.message, timestamp]
         );
     });
 });
@@ -157,6 +167,10 @@ app.use(express.urlencoded({ extended: false }));
 app.get("/api/home", (req, res) => {
     res.json({ message: "Hello world!" });
 });
+
+// app.get("/api/get-messages", (req, res) => {
+//     const { }
+// })
 
 app.post("/api/register", async (req, res) => {
     try {

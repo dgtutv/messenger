@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS users CASCADE;
-
+DROP TABLE IF EXISTS messages CASCADE;
 
 CREATE TABLE users(
     id   SERIAL PRIMARY KEY,
@@ -14,7 +14,7 @@ CREATE TABLE users(
 CREATE TABLE messages(
     id SERIAL PRIMARY KEY,
     sender_email VARCHAR(255) NOT NULL,
+    recipient_email VARCHAR(255) NOT NULL,
     time_sent TIMESTAMP,
-    conversationID INT NOT NULL,
     content TEXT
 );
