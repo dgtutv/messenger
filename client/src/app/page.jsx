@@ -20,6 +20,7 @@ function Page() {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const [messages, setMessages] = useState([]);
+    const [conversations, setConversations] = useState([]);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -68,7 +69,7 @@ function Page() {
                     return response.json()
                 })
                 .then(data => {
-                    console.log(data);
+                    console.log('Fetched messages:', data);
                     setMessages(data.messages || []);
                 })
                 .catch(error => {
@@ -76,6 +77,37 @@ function Page() {
                 });
         }
     }, [email])
+
+    // Group messages into conversations
+    useEffect(() => {
+        if (!email || messages.length === 0) {
+            console.log('No email or no messages');
+            return;
+        }
+
+        console.log('Processing messages:', messages);
+
+        // Create a map to track conversations
+        const conversationMap = new Map();
+
+        messages.forEach((msg) => {
+            // Determine the other person in the conversation
+            const otherPerson = msg.sender_email === email ? msg.recipient_email : msg.sender_email;
+
+            if (!conversationMap.has(otherPerson)) {
+                conversationMap.set(otherPerson, {
+                    recipientEmail: otherPerson,
+                    messages: []
+                });
+            }
+
+            conversationMap.get(otherPerson).messages.push(msg);
+        });
+
+        const conversationArray = Array.from(conversationMap.values());
+        console.log('Conversations created:', conversationArray);
+        setConversations(conversationArray);
+    }, [messages, email])
 
     useEffect(() => {
         // Fetch user data
@@ -100,7 +132,6 @@ function Page() {
                 }
             })
             .catch(error => {
-                ``
                 console.error('Failed to fetch user:', error);
                 setIsLoading(false);
                 // Only redirect on client side
@@ -138,9 +169,13 @@ function Page() {
                     overflow: "auto"
                 }}>
                     <List sx={{ padding: 0 }}>
-                        <ListItemButton sx={{ borderBottom: 1, borderColor: "divider" }}>Test</ListItemButton>
-                        <ListItemButton sx={{ borderBottom: 1, borderColor: "divider" }}>Conversation 2</ListItemButton>
-                        <ListItemButton sx={{ borderBottom: 1, borderColor: "divider" }}>Conversation 3</ListItemButton>
+                        {conversations.map((conversation) => (
+                            <ListItemButton onClick={() => {
+
+                            }} key={conversation.recipientEmail} sx={{ borderBottom: 1, borderColor: "divider" }}>
+                                {conversation.recipientEmail}
+                            </ListItemButton>
+                        ))}
                     </List>
                 </Box>
             )}
