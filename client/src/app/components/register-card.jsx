@@ -75,12 +75,12 @@ const RegisterCard = () => {
     return (
         <Box style={mainStyle}>
             <form onSubmit={handleSubmit} style={formStyle}>
-                <TextField required style={formControlStyle} onChange={(event) => { setName(event.target.value) }} label="Name" variant='outlined' />
-                <TextField required type='email' style={formControlStyle} onChange={(event) => { setEmail(event.target.value) }} label="Email address" variant='outlined' />
+                <TextField required style={formControlStyle} onChange={(e) => setName(e.target.value)} label="Name" variant='outlined' />
+                <TextField required type='email' style={formControlStyle} onChange={(e) => setEmail(e.target.value)} label="Email address" variant='outlined' />
                 <TextField
                     required
                     style={formControlStyle}
-                    onChange={(event) => { setPassword(event.target.value) }}
+                    onChange={(e) => setPassword(e.target.value)}
                     label="Password"
                     variant='outlined'
                     type="password"
@@ -89,7 +89,7 @@ const RegisterCard = () => {
                 <TextField
                     required
                     style={formControlStyle}
-                    onChange={(event) => { setConfirmPassword(event.target.value) }}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     label="Confirm password"
                     variant='outlined'
                     type="password"

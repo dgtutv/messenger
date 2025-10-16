@@ -48,9 +48,15 @@ io.on("connection", (socket) => {
 });
 
 app.use(cors());
+app.use(express.json());
 
 app.get("/api/home", (req, res) => {
     res.json({ message: "Hello world!" });
+});
+
+app.post("/api/register", (req, res) => {
+    const { name, email, password } = req.body;
+    console.log(name, email, password);
 });
 
 server.listen(PORT, () => {
