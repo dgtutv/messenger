@@ -2,13 +2,13 @@
 const fs = require('fs');
 const { Client } = require("pg");
 require('dotenv').config();
-const { USERNAME, PASSWORD, DBNAME } = process.env;
+const { USERNAME, PASSWORD, DATABASE } = process.env;
 const SQL = fs.readFileSync(`${__dirname}/initialize.sql`, 'utf8');
 
 async function main() {
     console.log("creating...");
     const client = new Client({
-        connectionString: `postgresql://${USERNAME}:${PASSWORD}@localhost:5432/${DBNAME}`
+        connectionString: `postgresql://${USERNAME}:${PASSWORD}@localhost:5432/${DATABASE}`
     });
 
     await client.connect();

@@ -12,6 +12,9 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 require('dotenv').config();
 
+// Email service
+const { generateVerificationCode, sendVerificationEmail } = require('./services/emailService');
+
 
 const pool = new Pool({
     user: process.env.USERNAME || 'postgres',
@@ -37,6 +40,12 @@ passport.use(
                 if (!user) {
                     return done(null, false, { message: "Incorrect email" });
                 }
+
+                // Check if email is verified
+                if (!user.email_verified) {
+                    return done(null, false, { message: "Please verify your email before logging in" });
+                }
+
                 const match = await bcrypt.compare(password, user.password);
                 if (!match) {
                     // passwords do not match!
@@ -141,12 +150,138 @@ app.get("/api/home", (req, res) => {
 
 app.post("/api/register", async (req, res) => {
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        await pool.query("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", [req.body.name, req.body.email, hashedPassword]);
-        res.status(201).json({ success: true, message: "User registered successfully" });
+        const { name, email, password } = req.body;
+
+        // Check if user already exists
+        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        if (existingUser.rows.length > 0) {
+            return res.status(400).json({ error: "Email already registered" });
+        }
+
+        // Generate verification code
+        const verificationCode = generateVerificationCode();
+        const codeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert user with unverified status
+        await pool.query(
+            "INSERT INTO users (name, email, password, email_verified, verification_code, verification_code_expires) VALUES ($1, $2, $3, $4, $5, $6)",
+            [name, email, hashedPassword, false, verificationCode, codeExpires]
+        );
+
+        // Send verification email
+        const emailResult = await sendVerificationEmail(email, name, verificationCode);
+
+        if (!emailResult.success) {
+            return res.status(500).json({ error: "Failed to send verification email" });
+        }
+
+        res.status(201).json({
+            success: true,
+            message: "Registration successful. Please check your email for verification code.",
+            email: email  // Send back email so frontend knows where code was sent
+        });
     } catch (error) {
-        console.error(error);
+        console.error('Registration error:', error);
         res.status(500).json({ error: "Registration failed. Please try again." });
+    }
+});
+
+// Verify email code
+app.post("/api/verify-email", async (req, res) => {
+    try {
+        const { email, code } = req.body;
+
+        if (!email || !code) {
+            return res.status(400).json({ error: "Email and code are required" });
+        }
+
+        // Find user with matching email and code
+        const result = await pool.query(
+            "SELECT * FROM users WHERE email = $1 AND verification_code = $2",
+            [email, code]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid verification code" });
+        }
+
+        const user = result.rows[0];
+
+        // Check if code has expired
+        if (new Date() > new Date(user.verification_code_expires)) {
+            return res.status(400).json({ error: "Verification code has expired" });
+        }
+
+        // Check if already verified
+        if (user.email_verified) {
+            return res.status(400).json({ error: "Email already verified" });
+        }
+
+        // Verify the email
+        await pool.query(
+            "UPDATE users SET email_verified = TRUE, verification_code = NULL, verification_code_expires = NULL WHERE email = $1",
+            [email]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Email verified successfully. You can now log in."
+        });
+    } catch (error) {
+        console.error('Verification error:', error);
+        res.status(500).json({ error: "Verification failed. Please try again." });
+    }
+});
+
+// Resend verification code
+app.post("/api/resend-verification", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+        // Find user
+        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const user = result.rows[0];
+
+        if (user.email_verified) {
+            return res.status(400).json({ error: "Email already verified" });
+        }
+
+        // Generate new code
+        const verificationCode = generateVerificationCode();
+        const codeExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+        // Update user with new code
+        await pool.query(
+            "UPDATE users SET verification_code = $1, verification_code_expires = $2 WHERE email = $3",
+            [verificationCode, codeExpires, email]
+        );
+
+        // Send email
+        const emailResult = await sendVerificationEmail(email, user.name, verificationCode);
+
+        if (!emailResult.success) {
+            return res.status(500).json({ error: "Failed to send verification email" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Verification code resent. Please check your email."
+        });
+    } catch (error) {
+        console.error('Resend verification error:', error);
+        res.status(500).json({ error: "Failed to resend code. Please try again." });
     }
 });
 
@@ -175,7 +310,6 @@ app.post("/api/login", (req, res, next) => {
     })(req, res, next);
 });
 
-// Add logout endpoint
 app.post("/api/logout", (req, res) => {
     req.logout((err) => {
         if (err) {
@@ -185,7 +319,6 @@ app.post("/api/logout", (req, res) => {
     });
 });
 
-// Add endpoint to check if user is authenticated
 app.get("/api/user", (req, res) => {
     if (req.isAuthenticated()) {
         res.status(200).json({

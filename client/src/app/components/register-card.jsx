@@ -74,13 +74,15 @@ const RegisterCard = () => {
                 setPassword("");
                 setConfirmPassword("");
 
-                // Redirect to login
-                router.push('/sign-in');
+                // Redirect to verification page with email
+                router.push(`/verify-email?email=${encodeURIComponent(email)}`);
             }
             else {
-                setError(data.message || "Registration failed. Please try again.");
+                setError(data.error || "Registration failed. Please try again.");
             }
-        } catch (error) {
+            setError(data.message || "Registration failed. Please try again.");
+        }
+        catch (error) {
             console.error('Error:', error);
             setError("Registration failed. Please try again.");
         }

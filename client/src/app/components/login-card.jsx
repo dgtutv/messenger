@@ -70,7 +70,13 @@ const LoginCard = () => {
                 router.push('/');
             }
             else {
-                setError(data.message || "Login failed. Please try again.");
+                // Check if error is about email verification
+                if (data.error && data.error.includes("verify your email")) {
+                    // Redirect to verification page with email
+                    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+                } else {
+                    setError(data.error || "Login failed. Please try again.");
+                }
             }
         } catch (error) {
             console.error('Error:', error);
