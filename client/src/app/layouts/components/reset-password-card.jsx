@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import { Paper, TextField, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 
 const ResetPasswordCard = () => {
@@ -8,19 +8,6 @@ const ResetPasswordCard = () => {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-
-    const mainStyle = {
-        background: "white",
-        padding: "32px",
-        width: "100%",
-        maxWidth: "448px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
-    }
 
     const formStyle = {
         width: "100%",
@@ -31,10 +18,6 @@ const ResetPasswordCard = () => {
         justifyContent: "space-between",
         alignItems: "center",
         gap: "24px"
-    }
-
-    const formControlStyle = {
-        width: "100%",
     }
 
     const handleSubmit = async (event) => {
@@ -75,18 +58,30 @@ const ResetPasswordCard = () => {
     };
 
     return (
-        <Box style={mainStyle}>
+        <Paper
+            elevation={3}
+            sx={{
+                padding: "32px",
+                width: "100%",
+                maxWidth: "448px",
+                borderRadius: "8px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}
+        >
             <Typography variant="h5" align="center" gutterBottom>
                 Reset Password
             </Typography>
             <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 2 }}>
-                Enter your email address and we'll send you a verification code
+                Enter your email to receive a reset code
             </Typography>
             <form onSubmit={handleSubmit} style={formStyle}>
                 <TextField
                     required
                     type='email'
-                    style={formControlStyle}
+                    fullWidth
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     label="Email address"
@@ -97,14 +92,14 @@ const ResetPasswordCard = () => {
                 )}
                 <Button
                     type='submit'
-                    style={formControlStyle}
+                    fullWidth
                     variant="contained"
                     disabled={isLoading}
                 >
                     {isLoading ? "Sending..." : "Send Reset Code"}
                 </Button>
             </form>
-        </Box>
+        </Paper>
     )
 }
 

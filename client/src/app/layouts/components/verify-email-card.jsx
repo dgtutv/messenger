@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import { Paper, TextField, Button, Typography } from '@mui/material'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const VerifyEmailCard = () => {
@@ -14,19 +14,6 @@ const VerifyEmailCard = () => {
     const [isResending, setIsResending] = useState(false);
     const router = useRouter();
 
-    const mainStyle = {
-        background: "white",
-        padding: "32px",
-        width: "100%",
-        maxWidth: "448px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
-    }
-
     const formStyle = {
         width: "100%",
         padding: "0",
@@ -36,10 +23,6 @@ const VerifyEmailCard = () => {
         justifyContent: "space-between",
         alignItems: "center",
         gap: "24px"
-    }
-
-    const formControlStyle = {
-        width: "100%",
     }
 
     const handleSubmit = async (event) => {
@@ -109,19 +92,43 @@ const VerifyEmailCard = () => {
 
     if (success) {
         return (
-            <Box style={mainStyle}>
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: "32px",
+                    width: "100%",
+                    maxWidth: "448px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 2
+                }}
+            >
                 <Typography variant="h6" color="success.main" align="center">
                     ✅ Email verified successfully!
                 </Typography>
                 <Typography variant="body2" align="center">
                     Redirecting to login...
                 </Typography>
-            </Box>
+            </Paper>
         );
     }
 
     return (
-        <Box style={mainStyle}>
+        <Paper
+            elevation={3}
+            sx={{
+                padding: "32px",
+                width: "100%",
+                maxWidth: "448px",
+                borderRadius: "8px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}
+        >
             <Typography variant="h5" align="center" gutterBottom>
                 Verify Your Email
             </Typography>
@@ -132,7 +139,7 @@ const VerifyEmailCard = () => {
                 <TextField
                     required
                     type='email'
-                    style={formControlStyle}
+                    fullWidth
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     label="Email address"
@@ -141,7 +148,7 @@ const VerifyEmailCard = () => {
                 />
                 <TextField
                     required
-                    style={formControlStyle}
+                    fullWidth
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     label="Verification Code"
@@ -152,19 +159,19 @@ const VerifyEmailCard = () => {
                 {error && (
                     <Typography color="error" variant="body2">{error}</Typography>
                 )}
-                <Button type='submit' style={formControlStyle} variant="contained">
+                <Button type='submit' fullWidth variant="contained">
                     Verify Email
                 </Button>
                 <Button
                     onClick={handleResend}
-                    style={formControlStyle}
+                    fullWidth
                     variant="text"
                     disabled={isResending || !email}
                 >
                     {isResending ? "Sending..." : "Resend Code"}
                 </Button>
             </form>
-        </Box>
+        </Paper>
     )
 }
 

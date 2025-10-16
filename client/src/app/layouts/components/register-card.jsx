@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import { Box, TextField, Button, Typography, Paper } from '@mui/material'
 import { useRouter } from 'next/navigation'
 
 const RegisterCard = () => {
@@ -10,19 +10,6 @@ const RegisterCard = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
-
-    const mainStyle = {
-        background: "white",
-        padding: "32px",
-        width: "100%",
-        maxWidth: "448px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
-    }
 
     const formStyle = {
         width: "100%",
@@ -89,13 +76,41 @@ const RegisterCard = () => {
     };
 
     return (
-        <Box style={mainStyle}>
+        <Paper
+            elevation={3}
+            sx={{
+                padding: "32px",
+                width: "100%",
+                maxWidth: "448px",
+                borderRadius: "8px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}
+        >
             <form onSubmit={handleSubmit} style={formStyle}>
-                <TextField required style={formControlStyle} onChange={(e) => setName(e.target.value)} label="Name" variant='outlined' />
-                <TextField required type='email' style={formControlStyle} onChange={(e) => setEmail(e.target.value)} label="Email address" variant='outlined' />
                 <TextField
                     required
-                    style={formControlStyle}
+                    fullWidth
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    label="Name"
+                    variant='outlined'
+                />
+                <TextField
+                    required
+                    type='email'
+                    fullWidth
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    label="Email address"
+                    variant='outlined'
+                />
+                <TextField
+                    required
+                    fullWidth
+                    value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     label="Password"
                     variant='outlined'
@@ -104,7 +119,8 @@ const RegisterCard = () => {
                 />
                 <TextField
                     required
-                    style={formControlStyle}
+                    fullWidth
+                    value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     label="Confirm password"
                     variant='outlined'
@@ -116,9 +132,9 @@ const RegisterCard = () => {
                 {error && error !== "Passwords do not match" && (
                     <Typography color="error" variant="body2">{error}</Typography>
                 )}
-                <Button type='submit' style={formControlStyle} variant="contained">Register</Button>
+                <Button type='submit' fullWidth variant="contained">Register</Button>
             </form>
-        </Box>
+        </Paper>
     )
 }
 

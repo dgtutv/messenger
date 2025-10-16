@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import { Paper, TextField, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -9,19 +9,6 @@ const LoginCard = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
-
-    const mainStyle = {
-        background: "white",
-        padding: "32px",
-        width: "100%",
-        maxWidth: "448px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
-    }
 
     const formStyle = {
         width: "100%",
@@ -32,11 +19,6 @@ const LoginCard = () => {
         justifyContent: "space-between",
         alignItems: "center",
         gap: "24px"
-    }
-
-    const formControlStyle = {
-        width: "100%",
-
     }
 
     const handleSubmit = async (event) => {
@@ -85,19 +67,33 @@ const LoginCard = () => {
     };
 
     return (
-        <Box style={mainStyle}>
+        <Paper
+            elevation={3}
+            sx={{
+                padding: "32px",
+                width: "100%",
+                maxWidth: "448px",
+                borderRadius: "8px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}
+        >
             <form onSubmit={handleSubmit} style={formStyle}>
                 <TextField
                     required
                     type='email'
-                    style={formControlStyle}
+                    fullWidth
+                    value={email}
                     onChange={(event) => { setEmail(event.target.value) }}
                     label="Email address"
                     variant='outlined'
                 />
                 <TextField
                     required
-                    style={formControlStyle}
+                    fullWidth
+                    value={password}
                     onChange={(event) => { setPassword(event.target.value) }}
                     label="Password"
                     variant='outlined'
@@ -107,9 +103,9 @@ const LoginCard = () => {
                 {error && (
                     <Typography color="error" variant="body2">{error}</Typography>
                 )}
-                <Button type='submit' style={formControlStyle} variant="contained">Sign in</Button>
+                <Button type='submit' fullWidth variant="contained">Sign in</Button>
             </form>
-        </Box>
+        </Paper>
     )
 }
 

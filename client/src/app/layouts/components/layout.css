@@ -1,0 +1,71 @@
+:root {
+    --header-bg: #181818ff;
+    --text-color: #e4e4e4;
+    --box-shadow: rgba(0, 0, 0, 0.86);
+    --link-hover: yellow;
+    --active-bg: #202020ff;
+    --active-border: yellow;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --header-bg: #d4d4d4;
+        --text-color: #213547;
+        --box-shadow: rgba(117, 117, 117, 0.86);
+        --link-hover: rgb(104, 151, 253);
+        --active-bg: rgb(58, 120, 255);
+        --active-border: rgb(58, 120, 255);
+    }
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--header-bg);
+    box-shadow: 0 4px 6px var(--box-shadow);
+    margin: 0;
+    color: var(--text-color);
+}
+
+nav {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.linkStyle {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 2px;
+    transition: all 0.2s ease-in-out;
+}
+
+.linkStyle:hover {
+    color: white;
+    background-color: var(--link-hover);
+}
+
+.activeLinkStyle {
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 2px;
+    transition: all 0.2s ease-in-out;
+    background-color: var(--active-bg);
+    border-bottom: 2px solid var(--active-border);
+}
+
+.activeLinkStyle:hover {
+    color: white;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}

@@ -1,10 +1,16 @@
-import VerifyResetCard from "../components/verify-reset-card";
+"use client"
+
+import VerifyResetCard from "../layouts/components/verify-reset-card";
 import React from 'react'
 import { Typography } from "@mui/material";
+import { useTheme } from '../contexts/ThemeContext';
 
 const VerifyReset = () => {
+    const { getThemeColors } = useTheme();
+    const themeColors = getThemeColors();
+
     const mainStyle = {
-        background: "#f9fafc",
+        background: themeColors.bgColor,
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
@@ -18,8 +24,8 @@ const VerifyReset = () => {
     return (
         <div style={mainStyle}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start" }}>
-                <Typography variant='h4' color="#3e4347">Verify Reset Code</Typography>
-                <Typography variant="subtitle1" color="#6b7278">
+                <Typography variant='h4' sx={{ color: themeColors.textColor }}>Verify Reset Code</Typography>
+                <Typography variant="subtitle1" sx={{ color: themeColors.textColor, opacity: 0.7 }}>
                     Enter the verification code sent to your email
                 </Typography>
             </div>

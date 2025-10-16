@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import { Box, TextField, Button, Typography } from '@mui/material'
+import { Paper, TextField, Button, Typography } from '@mui/material'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const VerifyResetCard = () => {
@@ -16,19 +16,6 @@ const VerifyResetCard = () => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
-    const mainStyle = {
-        background: "white",
-        padding: "32px",
-        width: "100%",
-        maxWidth: "448px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        alignItems: "center"
-    }
-
     const formStyle = {
         width: "100%",
         padding: "0",
@@ -38,10 +25,6 @@ const VerifyResetCard = () => {
         justifyContent: "space-between",
         alignItems: "center",
         gap: "24px"
-    }
-
-    const formControlStyle = {
-        width: "100%",
     }
 
     const handleVerifyCode = async (event) => {
@@ -157,7 +140,19 @@ const VerifyResetCard = () => {
     if (step === 1) {
         // Step 1: Verify code
         return (
-            <Box style={mainStyle}>
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: "32px",
+                    width: "100%",
+                    maxWidth: "448px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                }}
+            >
                 <Typography variant="h5" align="center" gutterBottom>
                     Verify Code
                 </Typography>
@@ -168,7 +163,7 @@ const VerifyResetCard = () => {
                     <TextField
                         required
                         type='email'
-                        style={formControlStyle}
+                        fullWidth
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         label="Email address"
@@ -177,7 +172,7 @@ const VerifyResetCard = () => {
                     />
                     <TextField
                         required
-                        style={formControlStyle}
+                        fullWidth
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
                         label="Verification Code"
@@ -190,7 +185,7 @@ const VerifyResetCard = () => {
                     )}
                     <Button
                         type='submit'
-                        style={formControlStyle}
+                        fullWidth
                         variant="contained"
                         disabled={isLoading}
                     >
@@ -198,20 +193,32 @@ const VerifyResetCard = () => {
                     </Button>
                     <Button
                         onClick={handleResend}
-                        style={formControlStyle}
+                        fullWidth
                         variant="text"
                         disabled={isLoading || !email}
                     >
                         {isLoading ? "Sending..." : "Resend Code"}
                     </Button>
                 </form>
-            </Box>
+            </Paper>
         );
     }
 
     // Step 2: Set new password
     return (
-        <Box style={mainStyle}>
+        <Paper
+            elevation={3}
+            sx={{
+                padding: "32px",
+                width: "100%",
+                maxWidth: "448px",
+                borderRadius: "8px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}
+        >
             <Typography variant="h5" align="center" gutterBottom>
                 Set New Password
             </Typography>
@@ -221,7 +228,7 @@ const VerifyResetCard = () => {
             <form onSubmit={handleResetPassword} style={formStyle}>
                 <TextField
                     required
-                    style={formControlStyle}
+                    fullWidth
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     label="New Password"
@@ -231,7 +238,7 @@ const VerifyResetCard = () => {
                 />
                 <TextField
                     required
-                    style={formControlStyle}
+                    fullWidth
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     label="Confirm New Password"
@@ -246,14 +253,14 @@ const VerifyResetCard = () => {
                 )}
                 <Button
                     type='submit'
-                    style={formControlStyle}
+                    fullWidth
                     variant="contained"
                     disabled={isLoading}
                 >
                     {isLoading ? "Resetting..." : "Reset Password"}
                 </Button>
             </form>
-        </Box>
+        </Paper>
     );
 }
 
