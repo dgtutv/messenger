@@ -10,7 +10,9 @@ const app = () => {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
-        gap: "40px"
+        gap: "40px",
+        padding: "20px",
+        textAlign: "center"
     }
     return (
         <div style={mainStyle}>
@@ -18,7 +20,7 @@ const app = () => {
                 <Typography variant='h4' color="#3e4347">Create a new user</Typography>
                 <div>
                     <Typography variant="subtitle1">
-                        Or <Link style={{ cursor: "pointer" }} color="#3e4347">sign up for a new account</Link>
+                        Or <Link href="/sign-in" style={{ cursor: "pointer" }} color="#3e4347">sign into an existing account</Link>
                     </Typography>
                 </div>
             </div>

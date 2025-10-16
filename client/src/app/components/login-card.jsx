@@ -2,11 +2,9 @@
 import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
 
-const RegisterCard = () => {
-    const [name, setName] = useState("");
+const LoginCard = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
 
     const mainStyle = {
@@ -42,41 +40,47 @@ const RegisterCard = () => {
         event.preventDefault();
         setError(""); // Clear previous errors
 
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
-        }
-
-        // Check password length (optional)
-        if (password.length < 8) {
-            setError("Password must be at least 8 characters");
+        // Basic validation
+        if (!email || !password) {
+            setError("Please fill in all fields");
             return;
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/register', {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.error || "Login failed. Please try again.");
+                return;
+            }
+
             console.log('Success:', data);
-            // Handle success (e.g., clear form, show success message)
+            // Handle success (e.g., redirect to dashboard, store token)
         } catch (error) {
             console.error('Error:', error);
-            setError("Registration failed. Please try again.");
+            setError("Login failed. Please try again.");
         }
     };
 
     return (
         <Box style={mainStyle}>
             <form onSubmit={handleSubmit} style={formStyle}>
-                <TextField required style={formControlStyle} onChange={(event) => { setName(event.target.value) }} label="Name" variant='outlined' />
-                <TextField required type='email' style={formControlStyle} onChange={(event) => { setEmail(event.target.value) }} label="Email address" variant='outlined' />
+                <TextField
+                    required
+                    type='email'
+                    style={formControlStyle}
+                    onChange={(event) => { setEmail(event.target.value) }}
+                    label="Email address"
+                    variant='outlined'
+                />
                 <TextField
                     required
                     style={formControlStyle}
@@ -84,26 +88,15 @@ const RegisterCard = () => {
                     label="Password"
                     variant='outlined'
                     type="password"
-                    autoComplete='new-password'
+                    autoComplete='current-password'
                 />
-                <TextField
-                    required
-                    style={formControlStyle}
-                    onChange={(event) => { setConfirmPassword(event.target.value) }}
-                    label="Confirm password"
-                    variant='outlined'
-                    type="password"
-                    autoComplete='new-password'
-                    error={error === "Passwords do not match"}
-                    helperText={error === "Passwords do not match" ? error : ""}
-                />
-                {error && error !== "Passwords do not match" && (
+                {error && (
                     <Typography color="error" variant="body2">{error}</Typography>
                 )}
-                <Button type='submit' style={formControlStyle} variant="contained">Register</Button>
+                <Button type='submit' style={formControlStyle} variant="contained">Sign in</Button>
             </form>
         </Box>
     )
 }
 
-export default RegisterCard;
+export default LoginCard;
