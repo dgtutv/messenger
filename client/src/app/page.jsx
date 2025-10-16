@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
-import { Typography, Box, List, ListItemButton, useMediaQuery, useTheme } from '@mui/material';
+import { Typography, Box, List, ListItemButton, useMediaQuery, useTheme, Card } from '@mui/material';
 
 let socket;
 
@@ -23,6 +23,19 @@ function Page() {
     const [conversations, setConversations] = useState([]);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    useEffect(() => {
+        if (!messageReceived.message) return;
+        fetch("http://localhost:8080/api/get-messages", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ userID: email })
+        })
+            .then(res => res.json())
+            .then(data => setMessages(data.messages || []))
+            .catch(err => console.error('Failed to fetch messages:', err));
+    }, [messageReceived, email])
 
     useEffect(() => {
         // Initialize socket connection with credentials
@@ -143,12 +156,23 @@ function Page() {
 
     const sendMessage = () => {
         if (socket && message && recipientEmail) {
+            const newMessage = {
+                sender_email: email,
+                recipient_email: recipientEmail,
+                content: message,
+                time_sent: new Date().toISOString()
+            };
+
+            setMessages(prevMessages => [...prevMessages, newMessage]);
+
+            // Send to server
             socket.emit("send_message", {
                 message,
                 senderEmail: email,
                 recipientEmail: recipientEmail,
                 timestamp: Date.now()
             });
+
             setMessage(""); // Clear input after sending
         }
     }
@@ -171,7 +195,7 @@ function Page() {
                     <List sx={{ padding: 0 }}>
                         {conversations.map((conversation) => (
                             <ListItemButton onClick={() => {
-
+                                setRecipientEmail(conversation.recipientEmail);
                             }} key={conversation.recipientEmail} sx={{ borderBottom: 1, borderColor: "divider" }}>
                                 {conversation.recipientEmail}
                             </ListItemButton>
@@ -192,7 +216,28 @@ function Page() {
                 </Box>
 
                 <Box sx={{ flexGrow: 1, p: 2, overflow: "auto" }}>
-                    {/* Messages will go here */}
+                    {recipientEmail ? (
+                        conversations.find(conv => conv.recipientEmail === recipientEmail)?.messages.map((message, index) => (
+                            <Box key={index} sx={{ mb: 2 }}>
+                                {message.sender_email === email ? (
+                                    <Card sx={{ bgcolor: "primary.main", alignSelf: "flex-end", maxWidth: "70%", ml: "auto", p: 2, width: "max-content" }}>
+                                        <Typography variant='body1' color="white">{message.content}</Typography>
+                                        <Typography variant="caption" color="rgba(255,255,255,0.7)">{new Date(message.time_sent).toLocaleString()}</Typography>
+                                    </Card>
+                                ) : (
+                                    <Card sx={{ bgcolor: "background.paper", alignSelf: "flex-start", maxWidth: "70%", p: 2, width: "max-content" }}>
+                                        <Typography variant='subtitle2' color="text.secondary">{message.sender_email}</Typography>
+                                        <Typography variant='body1'>{message.content}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{new Date(message.time_sent).toLocaleString()}</Typography>
+                                    </Card>
+                                )}
+
+
+                            </Box>
+
+                        ))) : (
+                        <Typography>Select a conversation, or start a new one.</Typography>
+                    )}
                 </Box>
 
                 <Box sx={{ p: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
@@ -203,7 +248,6 @@ function Page() {
                             value={recipientEmail}
                             onChange={(event) => setRecipientEmail(event.target.value)}
                         />
-                        <button onClick={() => setRecipientEmail(recipientEmail)}>Set Recipient</button>
                     </div>
 
                     <div>
