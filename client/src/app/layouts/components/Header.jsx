@@ -2,6 +2,7 @@ import { useState } from 'react';
 import "./layout.css"
 import { IconButton, Drawer, Button, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import { useRouter } from 'next/navigation';
 
 const Header = () => {
@@ -59,15 +60,7 @@ const Header = () => {
                             },
                         }}
                     >
-                        <Button
-                            onClick={handleLogout}
-                            sx={{
-                                color: 'text.primary',
-                                textTransform: 'none',
-                                justifyContent: 'flex-start',
-                                padding: '8px 16px'
-                            }}
-                        >
+                        <Button variant="contained" onClick={handleLogout} >
                             Logout
                         </Button>
                     </Drawer>
