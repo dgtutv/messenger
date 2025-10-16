@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
+import { Typography, Box, List, ListItemButton } from '@mui/material';
 
 let socket;
 
@@ -125,36 +126,61 @@ function Page() {
   }
 
   return (
-    <div>
-      <h2>Welcome, {name}</h2>
-      <p>Your email: {email}</p>
+    <Box sx={{ display: "flex", width: "100%", height: "calc(100vh - 64px)", borderTop: 1, borderColor: "divider" }} >
+      {/* Sidebar - 2 parts */}
+      <Box sx={{
+        flex: "2",
+        borderRight: 1,
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        overflow: "auto"
+      }}>
+        <List sx={{ padding: 0 }}>
+          <ListItemButton sx={{ borderBottom: 1, borderColor: "divider" }}>Test</ListItemButton>
+          <ListItemButton sx={{ borderBottom: 1, borderColor: "divider" }}>Conversation 2</ListItemButton>
+          <ListItemButton sx={{ borderBottom: 1, borderColor: "divider" }}>Conversation 3</ListItemButton>
+        </List>
+      </Box>
 
-      <div>
-        <input
-          type="email"
-          placeholder='Recipient Email'
-          value={recipientEmail}
-          onChange={(event) => setRecipientEmail(event.target.value)}
-        />
-        <button onClick={() => setRecipientEmail(recipientEmail)}>Set Recipient</button>
-      </div>
+      {/* Main chat area - 5 parts */}
+      <Box sx={{
+        flex: "5",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "background.default"
+      }}>
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+          <Typography variant="h6">Welcome, {name}</Typography>
+          <Typography variant="caption" color="text.secondary">Your email: {email}</Typography>
+        </Box>
 
-      <div>
-        <input
-          type="text"
-          placeholder='Message...'
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-        />
-        <button onClick={sendMessage}>Send Message</button>
-      </div>
+        <Box sx={{ flexGrow: 1, p: 2, overflow: "auto" }}>
+          {/* Messages will go here */}
+        </Box>
 
-      <div>
-        <p><b>From: {messageReceived.senderEmail}</b></p>
-        <p>{messageReceived.message}</p>
-        <p><i>{messageReceived.timestamp ? new Date(messageReceived.timestamp).toLocaleString() : ""}</i></p>
-      </div>
-    </div>
+        <Box sx={{ p: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+          <div>
+            <input
+              type="email"
+              placeholder='Recipient Email'
+              value={recipientEmail}
+              onChange={(event) => setRecipientEmail(event.target.value)}
+            />
+            <button onClick={() => setRecipientEmail(recipientEmail)}>Set Recipient</button>
+          </div>
+
+          <div>
+            <input
+              type="text"
+              placeholder='Message...'
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+            />
+            <button onClick={sendMessage}>Send Message</button>
+          </div>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
