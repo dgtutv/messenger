@@ -47,8 +47,8 @@ const LoginCard = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/login', {
-                method: 'POST',
+            const response = await fetch('http://localhost:8080/api/login', {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },

@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react'
 import { Box, TextField, Button, Typography } from '@mui/material'
+import { useRouter } from 'next/navigation'
 
 const RegisterCard = () => {
     const [name, setName] = useState("");
@@ -8,6 +9,7 @@ const RegisterCard = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const mainStyle = {
         background: "white",
@@ -64,8 +66,20 @@ const RegisterCard = () => {
             });
 
             const data = await response.json();
-            console.log('Success:', data);
-            // Handle success (e.g., clear form, show success message)
+
+            if (response.ok) {
+                // Clear form
+                setName("");
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
+
+                // Redirect to login
+                router.push('/sign-in');
+            }
+            else {
+                setError(data.message || "Registration failed. Please try again.");
+            }
         } catch (error) {
             console.error('Error:', error);
             setError("Registration failed. Please try again.");

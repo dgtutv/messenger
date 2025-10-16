@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080;
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
 
 //Required for database
 const { Pool } = require("pg");
@@ -22,7 +23,43 @@ const pool = new Pool({
         return process.env.PASSWORD;
     })(),
     port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
-})
+});
+
+passport.use(
+    new LocalStrategy(async (email, password, done) => {
+        try {
+            const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+            const user = rows[0];
+
+            if (!user) {
+                return done(null, false, { message: "Incorrect email" });
+            }
+            const match = await bcrypt.compare(password, user.password);
+            if (!match) {
+                // passwords do not match!
+                return done(null, false, { message: "Incorrect password" })
+            }
+            return done(null, user);
+        } catch (err) {
+            return done(err);
+        }
+    })
+);
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+        const user = rows[0];
+
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
+});
 
 //Required for socket.io
 const http = require("http");
@@ -50,13 +87,23 @@ io.on("connection", (socket) => {
 app.use(cors());
 app.use(express.json());
 
+app.use(session({ secret: "cats", resave: false, saveUninitialized: false }));
+app.use(passport.session());
+app.use(express.urlencoded({ extended: false }));
+
 app.get("/api/home", (req, res) => {
     res.json({ message: "Hello world!" });
 });
 
-app.post("/api/register", (req, res) => {
-    const { name, email, password } = req.body;
-    console.log(name, email, password);
+app.post("/api/register", async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        await pool.query("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", [req.body.name, req.body.email, hashedPassword]);
+        res.status(201).json({ success: true, message: "User registered successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Registration failed. Please try again." });
+    }
 });
 
 server.listen(PORT, () => {
