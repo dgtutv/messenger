@@ -18,6 +18,7 @@ function Page() {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     // Initialize socket connection with credentials
@@ -45,6 +46,35 @@ function Page() {
   }, []);
 
   useEffect(() => {
+    //Load all messages
+    if (email) { // Only fetch when email is available
+      fetch("http://localhost:8080/api/get-messages", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          userID: email
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch messages')
+          }
+          return response.json()
+        })
+        .then(data => {
+          console.log(data);
+          setMessages(data.messages || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch messages:', error);
+        });
+    }
+  }, [email])
+
+  useEffect(() => {
     // Fetch user data
     fetch("http://localhost:8080/api/user", {
       credentials: 'include'
@@ -67,6 +97,7 @@ function Page() {
         }
       })
       .catch(error => {
+        ``
         console.error('Failed to fetch user:', error);
         setIsLoading(false);
         // Only redirect on client side

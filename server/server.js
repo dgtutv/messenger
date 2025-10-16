@@ -168,9 +168,28 @@ app.get("/api/home", (req, res) => {
     res.json({ message: "Hello world!" });
 });
 
-// app.get("/api/get-messages", (req, res) => {
-//     const { }
-// })
+app.post("/api/get-messages", async (req, res) => {
+    try {
+        const { userID } = req.body;
+
+        if (!userID) {
+            return res.status(400).json({ error: "UserID is required" });
+        }
+
+        const { rows } = await pool.query(
+            "SELECT * FROM messages WHERE sender_email = $1 OR recipient_email = $1 ORDER BY time_sent ASC",
+            [userID]
+        );
+
+        res.status(200).json({
+            success: true,
+            messages: rows
+        });
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ error: "Failed to fetch messages. Please try again." });
+    }
+});
 
 app.post("/api/register", async (req, res) => {
     try {
