@@ -3,9 +3,11 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
-import { Typography, Box, List, ListItemButton, useMediaQuery, useTheme, Card, TextField, IconButton, InputAdornment } from '@mui/material';
+import { Typography, Box, useMediaQuery, useTheme, Card, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import ConversationList from './components/ConversationList';
+import { useConversations } from './contexts/ConversationContext';
 
 let socket;
 
@@ -16,16 +18,17 @@ function Page() {
         message: "",
         timestamp: ""
     });
-    const [recipientEmail, setRecipientEmail] = useState("");
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const [messages, setMessages] = useState([]);
-    const [conversations, setConversations] = useState([]);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const messagesEndRef = useRef(null);
+
+    // Use conversation context
+    const { conversations, setConversations, recipientEmail, setRecipientEmail } = useConversations();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -194,12 +197,8 @@ function Page() {
     }
 
     //Keyboard on phones?
-    //Add text box
-    //Header should get the conversations on phones
     //Edit user, user image in convo
-    //Message boxes should be prettier
     //Upload images, emojis
-
 
     return (
         <Box sx={{ display: "flex", width: "100%", height: "calc(99vh - 64px)", borderTop: 1, borderColor: "divider" }} >
@@ -211,15 +210,11 @@ function Page() {
                     bgcolor: "background.paper",
                     overflow: "auto"
                 }}>
-                    <List sx={{ padding: 0 }}>
-                        {conversations.map((conversation) => (
-                            <ListItemButton onClick={() => {
-                                setRecipientEmail(conversation.recipientEmail);
-                            }} key={conversation.recipientEmail} sx={{ borderBottom: 1, borderColor: "divider" }}>
-                                {conversation.recipientEmail}
-                            </ListItemButton>
-                        ))}
-                    </List>
+                    <ConversationList
+                        conversations={conversations}
+                        selectedRecipient={recipientEmail}
+                        onSelectConversation={setRecipientEmail}
+                    />
                 </Box>
             )}
             {/* Main chat area - 5 parts */}

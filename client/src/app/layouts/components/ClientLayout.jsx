@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ThemeProvider, createTheme, useMediaQuery } from '@mui/material';
 import { useMemo, useState, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
+import { ConversationProvider } from '../../contexts/ConversationContext';
 
 export default function ClientLayout({ children }) {
     const pathname = usePathname();
@@ -37,8 +38,10 @@ export default function ClientLayout({ children }) {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            {showHeader && <Header />}
-            {children}
+            <ConversationProvider>
+                {showHeader && <Header />}
+                {children}
+            </ConversationProvider>
         </ThemeProvider>
     );
 }
