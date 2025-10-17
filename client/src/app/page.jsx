@@ -3,7 +3,9 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
-import { Typography, Box, List, ListItemButton, useMediaQuery, useTheme, Card } from '@mui/material';
+import { Typography, Box, List, ListItemButton, useMediaQuery, useTheme, Card, TextField, IconButton, InputAdornment } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 let socket;
 
@@ -237,52 +239,139 @@ function Page() {
                     p: 2,
                     overflow: "auto",
                     display: "flex",
-                    flexDirection: "column"
+                    flexDirection: "column",
+                    gap: 1
                 }}>
                     {recipientEmail ? (
                         conversations.find(conv => conv.recipientEmail === recipientEmail)?.messages.map((message, index) => (
-                            <Box key={index} sx={{ mb: 2 }}>
+                            <Box
+                                key={index}
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: message.sender_email === email ? "flex-end" : "flex-start",
+                                    mb: 0.5
+                                }}
+                            >
                                 {message.sender_email === email ? (
-                                    <Card sx={{ bgcolor: "primary.main", alignSelf: "flex-end", maxWidth: "70%", ml: "auto", p: 2, width: "max-content" }}>
-                                        <Typography variant='body1' color="white">{message.content}</Typography>
-                                        <Typography variant="caption" color="rgba(255,255,255,0.7)">{new Date(message.time_sent).toLocaleString()}</Typography>
-                                    </Card>
+                                    // Sent message bubble - iMessage blue
+                                    <Box sx={{
+                                        bgcolor: "primary.main",
+                                        maxWidth: "70%",
+                                        px: 2,
+                                        py: 1,
+                                        borderRadius: "18px",
+                                        borderBottomRightRadius: "4px"
+                                    }}>
+                                        <Typography variant='body1' color="white" sx={{ wordBreak: "break-word" }}>
+                                            {message.content}
+                                        </Typography>
+                                    </Box>
                                 ) : (
-                                    <Card sx={{ bgcolor: "background.paper", alignSelf: "flex-start", maxWidth: "70%", p: 2, width: "max-content" }}>
-                                        <Typography variant='subtitle2' color="text.secondary">{message.sender_email}</Typography>
-                                        <Typography variant='body1'>{message.content}</Typography>
-                                        <Typography variant="caption" color="text.secondary">{new Date(message.time_sent).toLocaleString()}</Typography>
-                                    </Card>
+                                    // Received message bubble - gray
+                                    <Box sx={{
+                                        bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300',
+                                        maxWidth: "70%",
+                                        px: 2,
+                                        py: 1,
+                                        borderRadius: "18px",
+                                        borderBottomLeftRadius: "4px"
+                                    }}>
+                                        <Typography variant='body1' sx={{ wordBreak: "break-word" }}>
+                                            {message.content}
+                                        </Typography>
+                                    </Box>
                                 )}
-
-
                             </Box>
-
                         ))) : (
-                        <Typography>Select a conversation, or start a new one.</Typography>
+                        <Typography color="text.secondary" align="center" sx={{ mt: 4 }}>
+                            Select a conversation to start messaging
+                        </Typography>
                     )}
                     <div ref={messagesEndRef} />
                 </Box>
 
-                <Box sx={{ p: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
-                    <div>
+                {/* Message input area */}
+                <Box sx={{
+                    p: 1.5,
+                    borderTop: 1,
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    display: "flex",
+                    alignItems: "flex-end",
+                    gap: 1
+                }}>
+                    {/* Image upload button */}
+                    <IconButton
+                        component="label"
+                        sx={{
+                            color: 'primary.main',
+                            mb: 0.5,
+                            '&:hover': {
+                                bgcolor: 'action.hover'
+                            }
+                        }}
+                    >
+                        <AddPhotoAlternateIcon />
                         <input
-                            type="email"
-                            placeholder='Recipient Email'
-                            value={recipientEmail}
-                            onChange={(event) => setRecipientEmail(event.target.value)}
+                            type="file"
+                            hidden
+                            accept="image/*"
+                            onChange={(e) => {
+                                // TODO: Handle image upload
+                                console.log('Image selected:', e.target.files[0]);
+                            }}
                         />
-                    </div>
+                    </IconButton>
 
-                    <div>
-                        <input
-                            type="text"
-                            placeholder='Message...'
-                            value={message}
-                            onChange={(event) => setMessage(event.target.value)}
-                        />
-                        <button onClick={sendMessage}>Send Message</button>
-                    </div>
+                    {/* Message input */}
+                    <TextField
+                        fullWidth
+                        multiline
+                        maxRows={4}
+                        placeholder="Message"
+                        value={message}
+                        onChange={(event) => setMessage(event.target.value)}
+                        onKeyPress={(event) => {
+                            if (event.key === 'Enter' && !event.shiftKey) {
+                                event.preventDefault();
+                                sendMessage();
+                            }
+                        }}
+                        variant="outlined"
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '20px',
+                                bgcolor: 'background.default',
+                                py: 0.5,
+                                px: 1.5
+                            },
+                            '& .MuiInputBase-input': {
+                                py: 0.75
+                            }
+                        }}
+                    />
+
+                    {/* Send button */}
+                    <IconButton
+                        onClick={sendMessage}
+                        disabled={!message.trim() || !recipientEmail}
+                        sx={{
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            width: 32,
+                            height: 32,
+                            mb: 0.5,
+                            '&:hover': {
+                                bgcolor: 'primary.dark',
+                            },
+                            '&:disabled': {
+                                bgcolor: 'action.disabledBackground',
+                                color: 'action.disabled'
+                            }
+                        }}
+                    >
+                        <SendIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
                 </Box>
             </Box>
         </Box>
