@@ -248,7 +248,7 @@ function Page() {
                                 }}
                             >
                                 {message.sender_email === email ? (
-                                    // Sent message bubble - iMessage blue
+                                    //Send message bubble
                                     <Box sx={{
                                         bgcolor: "primary.main",
                                         maxWidth: "70%",
@@ -262,9 +262,9 @@ function Page() {
                                         </Typography>
                                     </Box>
                                 ) : (
-                                    // Received message bubble - gray
+                                    // Received message bubble
                                     <Box sx={{
-                                        bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300',
+                                        bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
                                         maxWidth: "70%",
                                         px: 2,
                                         py: 1,
@@ -301,8 +301,11 @@ function Page() {
                         sx={{
                             color: 'primary.main',
                             mb: 0.5,
+                            transition: 'all 0.2s ease-in-out',
                             '&:hover': {
-                                bgcolor: 'action.hover'
+                                bgcolor: 'action.hover',
+                                transform: 'scale(1.1)',
+                                color: 'primary.dark'
                             }
                         }}
                     >
@@ -326,7 +329,7 @@ function Page() {
                         placeholder="Message"
                         value={message}
                         onChange={(event) => setMessage(event.target.value)}
-                        onKeyPress={(event) => {
+                        onKeyDown={(event) => {
                             if (event.key === 'Enter' && !event.shiftKey) {
                                 event.preventDefault();
                                 sendMessage();

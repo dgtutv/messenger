@@ -3,6 +3,7 @@ import "./layout.css"
 import { IconButton, Drawer, Button, Box, Typography, useMediaQuery, useTheme, Divider } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
 import ConversationList from '../../components/ConversationList';
 import { useConversations } from '../../contexts/ConversationContext';
@@ -12,7 +13,7 @@ const Header = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter();
-    const { conversations, recipientEmail, setRecipientEmail } = useConversations();
+    const { conversations, setConversations, recipientEmail, setRecipientEmail } = useConversations();
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
@@ -32,6 +33,16 @@ const Header = () => {
             console.error('Logout failed:', error);
         }
     };
+
+    const handleAdd = async () => {
+        try {
+
+        } catch (error) {
+
+        }
+        const newConversations = conversations;
+        newConversations.push()
+    }
 
     return (
         <>
@@ -100,13 +111,40 @@ const Header = () => {
                     <Typography variant="h5" component="h1" color="text.primary">
                         Messenger
                     </Typography>
-                    <IconButton
-                        sx={{ zIndex: 1300, color: 'text.primary' }}
-                        onClick={toggleMobileMenu}
-                        aria-label="open menu"
-                    >
-                        <MenuIcon />
-                    </IconButton>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <IconButton
+                            component="label"
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <AddIcon sx={{ color: "text.primary" }} />
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => {
+                                    // TODO: Handle image upload
+                                    console.log('Image selected:', e.target.files[0]);
+                                }}
+                            />
+                        </IconButton>
+                        <IconButton
+                            sx={{ zIndex: 1300, color: 'text.primary' }}
+                            onClick={toggleMobileMenu}
+                            aria-label="open menu"
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                    </Box>
+
                 </Box>
 
             ) : (
@@ -126,6 +164,30 @@ const Header = () => {
                         Messenger
                     </Typography>
                     <Box component="nav">
+                        <IconButton
+                            component="label"
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <AddIcon sx={{ color: "text.primary" }} />
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => {
+                                    // TODO: Handle image upload
+                                    console.log('Image selected:', e.target.files[0]);
+                                }}
+                            />
+                        </IconButton>
                         <Button variant='contained' onClick={handleLogout}>
                             Sign out
                         </Button>
