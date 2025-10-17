@@ -34,7 +34,7 @@ passport.use(
         { usernameField: 'email' },
         async (email, password, done) => {
             try {
-                const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+                const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
                 const user = rows[0];
 
                 if (!user) {
@@ -196,7 +196,7 @@ app.post("/api/register", async (req, res) => {
         const { name, email, password } = req.body;
 
         // Check if user already exists
-        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
         if (existingUser.rows.length > 0) {
             return res.status(400).json({ error: "Email already registered" });
         }
@@ -208,10 +208,10 @@ app.post("/api/register", async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user with unverified status
+        // Insert user with unverified status (store email as lowercase)
         await pool.query(
             "INSERT INTO users (name, email, password, email_verified, verification_code, verification_code_expires) VALUES ($1, $2, $3, $4, $5, $6)",
-            [name, email, hashedPassword, false, verificationCode, codeExpires]
+            [name, email.toLowerCase(), hashedPassword, false, verificationCode, codeExpires]
         );
 
         // Send verification email
@@ -241,8 +241,8 @@ app.post("/api/request-password-reset", async (req, res) => {
             return res.status(400).json({ error: "Email is required" });
         }
 
-        // Check if user exists
-        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        // Check if user exists (case-insensitive)
+        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
         if (existingUser.rows.length < 1) {
             return res.status(400).json({ error: "Email not registered" });
         }
@@ -286,10 +286,10 @@ app.post("/api/verify-reset-code", async (req, res) => {
             return res.status(400).json({ error: "Email and code are required" });
         }
 
-        // Find user with matching email and code
+        // Find user with matching email and code (case-insensitive)
         const result = await pool.query(
             "SELECT * FROM users WHERE email = $1 AND verification_code = $2",
-            [email, code]
+            [email.toLowerCase(), code]
         );
 
         if (result.rows.length === 0) {
@@ -326,10 +326,10 @@ app.post("/api/reset-password", async (req, res) => {
             return res.status(400).json({ error: "Password must be at least 8 characters" });
         }
 
-        // Verify code again
+        // Verify code again (case-insensitive)
         const result = await pool.query(
             "SELECT * FROM users WHERE email = $1 AND verification_code = $2",
-            [email, code]
+            [email.toLowerCase(), code]
         );
 
         if (result.rows.length === 0) {
@@ -372,10 +372,10 @@ app.post("/api/verify-email", async (req, res) => {
             return res.status(400).json({ error: "Email and code are required" });
         }
 
-        // Find user with matching email and code
+        // Find user with matching email and code (case-insensitive)
         const result = await pool.query(
             "SELECT * FROM users WHERE email = $1 AND verification_code = $2",
-            [email, code]
+            [email.toLowerCase(), code]
         );
 
         if (result.rows.length === 0) {
@@ -394,10 +394,10 @@ app.post("/api/verify-email", async (req, res) => {
             return res.status(400).json({ error: "Email already verified" });
         }
 
-        // Verify the email
+        // Verify the email (case-insensitive)
         await pool.query(
             "UPDATE users SET email_verified = TRUE, verification_code = NULL, verification_code_expires = NULL WHERE email = $1",
-            [email]
+            [email.toLowerCase()]
         );
 
         res.status(200).json({
@@ -419,8 +419,8 @@ app.post("/api/resend-verification", async (req, res) => {
             return res.status(400).json({ error: "Email is required" });
         }
 
-        // Find user
-        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        // Find user (case-insensitive)
+        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: "User not found" });
