@@ -10,6 +10,16 @@ const session = require("express-session");
 const pgSession = require('connect-pg-simple')(session);
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+
+//Image storage
+const multer = require("multer");
+const sharp = require("sharp");
+const uploadDir = "./uploads";
+const fs = require("fs");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
 require('dotenv').config();
 
 // Email service
@@ -508,32 +518,41 @@ app.get("/api/user", (req, res) => {
     }
 });
 
-app.post("/api/user/get-name", async (req, res) => {
+app.post("/upload", upload.array("images"), async (req, res) => {
+    const { message_id } = req.body;
+    const files = req.files;
+
     try {
-        const { email } = req.body;
+        const savedUrls = [];
 
-        if (!email) {
-            return res.status(400).json({ error: "recipient email is required" });
+        for (const file of files) {
+            const filename = `${Date.now()}-${file.originalname}`;
+            const filepath = path.join(uploadDir, filename);
+
+            await sharp(file.buffer)
+                .resize({ width: 1920, height: 1080, fit: "inside" })
+                .toFile(filepath);
+
+            const fileUrl = `/uploads/${filename}`;
+            savedUrls.push(fileUrl);
+
+            await pool.query(
+                `INSERT INTO message_images (message_id, image_url) VALUES ($1, $2)`,
+                [message_id, fileUrl]
+            );
         }
 
-        const result = await pool.query("SELECT name FROM users WHERE email = $1", [email.toLowerCase()]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.status(200).json({
-            success: true,
-            username: result.rows[0].name
-        })
+        res.json({ success: true, images: savedUrls });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Upload failed" });
     }
-    catch (error) {
-        console.log("Error fetching username", error);
-        res.status(500).json({ error: "Internal error" });
-    }
-
-
 });
+
+// Serve static files
+app.use("/uploads", express.static("uploads"));
+
+app.post("api/upload", upload.array("images"))
 
 server.listen(PORT, () => {
     console.log(`Server started on port: ${PORT}`);
