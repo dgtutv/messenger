@@ -35,7 +35,7 @@ function Page() {
 
     useEffect(() => {
         if (!messageReceived.message) return;
-        fetch("http://localhost:8080/api/get-messages", {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-messages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -48,7 +48,7 @@ function Page() {
 
     useEffect(() => {
         // Initialize socket connection with credentials
-        socket = io("http://localhost:8080", {
+        socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
             withCredentials: true
         });
 
@@ -74,7 +74,7 @@ function Page() {
     useEffect(() => {
         //Load all messages
         if (email) { // Only fetch when email is available
-            fetch("http://localhost:8080/api/get-messages", {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-messages`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -133,7 +133,7 @@ function Page() {
 
     useEffect(() => {
         // Fetch user data
-        fetch("http://localhost:8080/api/user", {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
             credentials: 'include'
         })
             .then(response => {
@@ -191,8 +191,16 @@ function Page() {
         return <div>Loading...</div>;
     }
 
+    //Keyboard on phones?
+    //Add text box
+    //Header should get the conversations on phones
+    //Edit user, user image in convo
+    //Message boxes should be prettier
+    //Upload images, emojis
+
+
     return (
-        <Box sx={{ display: "flex", width: "100%", height: "calc(100vh - 64px)", borderTop: 1, borderColor: "divider" }} >
+        <Box sx={{ display: "flex", width: "100%", height: "calc(99vh - 64px)", borderTop: 1, borderColor: "divider" }} >
             {isMobile ? <></> : (
                 <Box sx={{
                     flex: "2",

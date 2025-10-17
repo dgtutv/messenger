@@ -32,7 +32,7 @@ const ResetPasswordCard = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/request-password-reset', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/request-password-reset`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

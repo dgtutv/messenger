@@ -39,7 +39,7 @@ const VerifyResetCard = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/verify-reset-code', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-reset-code`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const VerifyResetCard = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/reset-password', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reset-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ const VerifyResetCard = () => {
         setError("");
 
         try {
-            const response = await fetch('http://localhost:8080/api/request-password-reset', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/request-password-reset`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

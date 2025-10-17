@@ -35,7 +35,7 @@ const VerifyEmailCard = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/verify-email', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const VerifyEmailCard = () => {
         setError("");
 
         try {
-            const response = await fetch('http://localhost:8080/api/resend-verification', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/resend-verification`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
