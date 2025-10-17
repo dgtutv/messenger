@@ -35,7 +35,11 @@ const Header = () => {
 
     const handleAdd = async (event) => {
         event.preventDefault();
-        if (addConversation) {
+        if (isMobile) {
+            toggleMobileMenu();
+            setAddConversation(true);
+        }
+        else if (addConversation) {
             setAddConversation(false);
         }
         else {
