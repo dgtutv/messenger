@@ -40,7 +40,7 @@ function Page() {
             body: JSON.stringify({ email: recipientEmail })
         })
             .then(res => res.json())
-            .then(data => setRecipientName(data.user))
+            .then(data => setRecipientName(data.username))
             .then(() => { console.log(recipientName) })
             .catch(err => console.error("Failed to fetch username:", err))
     }, [recipientEmail]);
@@ -233,7 +233,7 @@ function Page() {
             }}>
                 {recipientEmail ? (
                     <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}>
-                        <Typography variant="h6">Messaging {recipientEmail}</Typography>
+                        <Typography variant="h6">Messaging: {recipientName}</Typography>
                         <Typography variant="caption" color="text.secondary">Their email: {recipientEmail}</Typography>
                     </Box>
                 ) : (

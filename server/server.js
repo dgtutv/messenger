@@ -516,15 +516,20 @@ app.post("/api/user/get-name", async (req, res) => {
             return res.status(400).json({ error: "recipient email is required" });
         }
 
-        const row = await pool.query("SELECT name FROM users WHERE email = $1", [email.toLowerCase()]);
+        const result = await pool.query("SELECT name FROM users WHERE email = $1", [email.toLowerCase()]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
         res.status(200).json({
             success: true,
-            user: row
+            username: result.rows[0].name
         })
     }
     catch (error) {
         console.log("Error fetching username", error);
-        res.status(500).json({ error: "Could not find user" });
+        res.status(500).json({ error: "Internal error" });
     }
 
 
