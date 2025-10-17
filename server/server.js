@@ -508,6 +508,28 @@ app.get("/api/user", (req, res) => {
     }
 });
 
+app.post("/api/user/get-name", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "recipient email is required" });
+        }
+
+        const row = await pool.query("SELECT name FROM users WHERE email = $1", [email.toLowerCase()]);
+        res.status(200).json({
+            success: true,
+            user: row
+        })
+    }
+    catch (error) {
+        console.log("Error fetching username", error);
+        res.status(500).json({ error: "Could not find user" });
+    }
+
+
+});
+
 server.listen(PORT, () => {
     console.log(`Server started on port: ${PORT}`);
 });

@@ -26,13 +26,24 @@ function Page() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const messagesEndRef = useRef(null);
-
-    // Use conversation context
+    const [recipientName, setRecipientName] = useState("");
     const { conversations, setConversations, recipientEmail } = useConversations();
-
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    useEffect(() => {
+        console.log(recipientEmail)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/get-name`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: recipientEmail })
+        })
+            .then(res => res.json())
+            .then(data => setRecipientName(data.user))
+            .then(() => { console.log(recipientName) })
+            .catch(err => console.error("Failed to fetch username:", err))
+    }, [recipientEmail]);
 
     useEffect(() => {
         scrollToBottom();
@@ -149,6 +160,7 @@ function Page() {
             })
             .then(data => {
                 const userEmail = data.user.email;
+
                 setEmail(userEmail);
                 setName(data.user.name);
                 setIsLoading(false);
@@ -199,7 +211,6 @@ function Page() {
     //Keyboard on phones?
     //Edit user, user image in convo
     //Upload images, emojis
-    //Same for admin, compare with old using all lowercase 
 
     return (
         <Box sx={{ display: "flex", width: "100%", height: "calc(99vh - 64px)", borderTop: 1, borderColor: "divider" }} >
@@ -214,17 +225,23 @@ function Page() {
                     <ConversationList />
                 </Box>
             )}
-            {/* Main chat area - 5 parts */}
             <Box sx={{
                 flex: "5",
                 display: "flex",
                 flexDirection: "column",
                 bgcolor: "background.default"
             }}>
-                <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}>
-                    <Typography variant="h6">Welcome, {name}</Typography>
-                    <Typography variant="caption" color="text.secondary">Your email: {email}</Typography>
-                </Box>
+                {recipientEmail ? (
+                    <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+                        <Typography variant="h6">Messaging {recipientEmail}</Typography>
+                        <Typography variant="caption" color="text.secondary">Their email: {recipientEmail}</Typography>
+                    </Box>
+                ) : (
+                    <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}>
+                        <Typography variant="h6">Welcome, {name}</Typography>
+                        <Typography variant="caption" color="text.secondary">Your email: {email}</Typography>
+                    </Box>
+                )}
 
                 <Box sx={{
                     flexGrow: 1,
@@ -380,7 +397,7 @@ function Page() {
                     </IconButton>
                 </Box>
             </Box>
-        </Box>
+        </Box >
     )
 }
 

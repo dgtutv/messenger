@@ -24,7 +24,7 @@ export const ConversationProvider = ({ children }) => {
                 recipientEmail,
                 setRecipientEmail,
                 addConversation,
-                setAddConversation
+                setAddConversation,
             }}
         >
             {children}
