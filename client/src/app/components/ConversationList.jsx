@@ -23,9 +23,8 @@ const ConversationList = ({ onSelectCallback, senderEmail }) => {
             if (onSelectCallback) onSelectCallback();
             return;
         }
-        const newConversations = conversations;
-        newConversations.push({ recipientEmail: newEmail, messages: [] })
-        setConversations(newConversations);
+        // Create a new conversation with proper immutability
+        setConversations(prev => [...prev, { recipientEmail: newEmail, messages: [] }]);
         setAddConversation(false);
         setRecipientEmail(newEmail);
         setNewEmail("");

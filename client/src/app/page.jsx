@@ -28,7 +28,7 @@ function Page() {
     const messagesEndRef = useRef(null);
 
     // Use conversation context
-    const { conversations, setConversations, recipientEmail, setRecipientEmail, addConversation, setAddConversation } = useConversations();
+    const { conversations, setConversations, recipientEmail } = useConversations();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -124,7 +124,7 @@ function Page() {
             if (!conversationMap.has(otherPerson)) {
                 conversationMap.set(otherPerson, {
                     recipientEmail: otherPerson,
-                    messages: [msg]
+                    messages: []
                 });
             }
 
@@ -234,46 +234,57 @@ function Page() {
                     gap: 1
                 }}>
                     {recipientEmail ? (
-                        conversations.find(conv => conv.recipientEmail === recipientEmail)?.messages.map((message, index) => (
-                            <Box
-                                key={index}
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: message.sender_email === email ? "flex-end" : "flex-start",
-                                    mb: 0.5
-                                }}
-                            >
-                                {message.sender_email === email ? (
-                                    //Send message bubble
-                                    <Box sx={{
-                                        bgcolor: "primary.main",
-                                        maxWidth: "70%",
-                                        px: 2,
-                                        py: 1,
-                                        borderRadius: "18px",
-                                        borderBottomRightRadius: "4px"
-                                    }}>
-                                        <Typography variant='body1' color="white" sx={{ wordBreak: "break-word" }}>
-                                            {message.content}
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    // Received message bubble
-                                    <Box sx={{
-                                        bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
-                                        maxWidth: "70%",
-                                        px: 2,
-                                        py: 1,
-                                        borderRadius: "18px",
-                                        borderBottomLeftRadius: "4px"
-                                    }}>
-                                        <Typography variant='body1' sx={{ wordBreak: "break-word" }}>
-                                            {message.content}
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Box>
-                        ))) : (
+                        (() => {
+                            const conversation = conversations.find(conv => conv.recipientEmail === recipientEmail);
+                            if (!conversation || conversation.messages.length === 0) {
+                                return (
+                                    <Typography color="text.secondary" align="center" sx={{ mt: 4 }}>
+                                        No messages yet. Start the conversation!
+                                    </Typography>
+                                );
+                            }
+                            return conversation.messages.map((message, index) => (
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: message.sender_email === email ? "flex-end" : "flex-start",
+                                        mb: 0.5
+                                    }}
+                                >
+                                    {message.sender_email === email ? (
+                                        //Send message bubble
+                                        <Box sx={{
+                                            bgcolor: "primary.main",
+                                            maxWidth: "70%",
+                                            px: 2,
+                                            py: 1,
+                                            borderRadius: "18px",
+                                            borderBottomRightRadius: "4px"
+                                        }}>
+                                            <Typography variant='body1' color="white" sx={{ wordBreak: "break-word" }}>
+                                                {message.content}
+                                            </Typography>
+                                        </Box>
+                                    ) : (
+                                        // Received message bubble
+                                        <Box sx={{
+                                            bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+                                            maxWidth: "70%",
+                                            px: 2,
+                                            py: 1,
+                                            borderRadius: "18px",
+                                            borderBottomLeftRadius: "4px"
+                                        }}>
+                                            <Typography variant='body1' sx={{ wordBreak: "break-word" }}>
+                                                {message.content}
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Box>
+                            ));
+                        })()
+                    ) : (
                         <Typography color="text.secondary" align="center" sx={{ mt: 4 }}>
                             Select a conversation to start messaging
                         </Typography>
