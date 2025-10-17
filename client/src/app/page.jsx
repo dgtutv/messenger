@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import { Typography, Box, List, ListItemButton, useMediaQuery, useTheme, Card } from '@mui/material';
@@ -23,6 +23,15 @@ function Page() {
     const [conversations, setConversations] = useState([]);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [conversations, recipientEmail]);
 
     useEffect(() => {
         if (!messageReceived.message) return;
@@ -215,7 +224,13 @@ function Page() {
                     <Typography variant="caption" color="text.secondary">Your email: {email}</Typography>
                 </Box>
 
-                <Box sx={{ flexGrow: 1, p: 2, overflow: "auto" }}>
+                <Box sx={{
+                    flexGrow: 1,
+                    p: 2,
+                    overflow: "auto",
+                    display: "flex",
+                    flexDirection: "column"
+                }}>
                     {recipientEmail ? (
                         conversations.find(conv => conv.recipientEmail === recipientEmail)?.messages.map((message, index) => (
                             <Box key={index} sx={{ mb: 2 }}>
@@ -238,6 +253,7 @@ function Page() {
                         ))) : (
                         <Typography>Select a conversation, or start a new one.</Typography>
                     )}
+                    <div ref={messagesEndRef} />
                 </Box>
 
                 <Box sx={{ p: 2, borderTop: 1, borderColor: "divider", bgcolor: "background.paper" }}>
