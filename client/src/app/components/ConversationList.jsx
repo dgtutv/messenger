@@ -1,17 +1,54 @@
 "use client"
 
-import React from 'react';
-import { List, ListItemButton, Typography, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { List, ListItemButton, Typography, Box, ListItem, TextField, Button } from '@mui/material';
+import { useConversations } from '../contexts/ConversationContext';
 
-const ConversationList = ({ conversations, selectedRecipient, onSelectConversation }) => {
+const ConversationList = ({ onSelectCallback, senderEmail }) => {
+    const { conversations, setConversations, recipientEmail, setRecipientEmail, addConversation, setAddConversation } = useConversations();
+    const [newEmail, setNewEmail] = useState("");
+
+    const handleNewConversation = () => {
+        //If no input, no work, if exists, redirect page no work
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (newEmail === "" || !emailRegex.test(newEmail)) {
+            return;
+        }
+        // Check if conversation already exists
+        if (conversations.some(conv => conv.recipientEmail === newEmail)) {
+            // If exists, just switch to it
+            setAddConversation(false);
+            setRecipientEmail(newEmail);
+            setNewEmail("");
+            if (onSelectCallback) onSelectCallback();
+            return;
+        }
+        const newConversations = conversations;
+        newConversations.push({ recipientEmail: newEmail, messages: [] })
+        setConversations(newConversations);
+        setAddConversation(false);
+        setRecipientEmail(newEmail);
+        setNewEmail("");
+        if (onSelectCallback) onSelectCallback();
+    }
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handleNewConversation();
+        }
+    };
+
     return (
         <List sx={{ padding: 0, width: '100%' }}>
             {conversations.length > 0 ? (
                 conversations.map((conversation) => (
                     <ListItemButton
-                        onClick={() => onSelectConversation(conversation.recipientEmail)}
+                        onClick={() => {
+                            setRecipientEmail(conversation.recipientEmail);
+                            if (onSelectCallback) onSelectCallback();
+                        }}
                         key={conversation.recipientEmail}
-                        selected={selectedRecipient === conversation.recipientEmail}
+                        selected={recipientEmail === conversation.recipientEmail}
                         sx={{
                             borderBottom: 1,
                             borderColor: "divider",
@@ -32,6 +69,7 @@ const ConversationList = ({ conversations, selectedRecipient, onSelectConversati
                         </Box>
                     </ListItemButton>
                 ))
+
             ) : (
                 <Box sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="body2" color="text.secondary">
@@ -39,7 +77,43 @@ const ConversationList = ({ conversations, selectedRecipient, onSelectConversati
                     </Typography>
                 </Box>
             )}
-        </List>
+            {addConversation ? (
+                <ListItem sx={{
+                    borderBottom: 1,
+                    borderColor: "divider",
+                    '&.Mui-selected': {
+                        bgcolor: 'action.selected'
+                    }
+                }}>
+                    <Box sx={{ width: '100%', overflow: 'hidden', display: 'flex', flexDirection: "column", alignItems: 'flex-start', gap: 1 }}>
+                        <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
+                            <TextField
+                                variant="standard"
+                                label="Email"
+                                value={newEmail}
+                                onKeyDown={handleKeyDown}
+                                fullWidth
+                                onChange={(e) => setNewEmail(e.target.value)}
+                            />
+                            <Button
+                                onClick={handleNewConversation}
+                                variant='outlined'
+                            >
+                                Add
+                            </Button>
+                        </Box>
+
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                            New conversation...
+                        </Typography>
+                    </Box>
+                </ListItem>
+            ) : (
+                <></>
+            )
+            }
+
+        </List >
     );
 };
 

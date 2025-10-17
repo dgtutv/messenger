@@ -2,7 +2,6 @@ import { useState } from 'react';
 import "./layout.css"
 import { IconButton, Drawer, Button, Box, Typography, useMediaQuery, useTheme, Divider } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
 import ConversationList from '../../components/ConversationList';
@@ -13,7 +12,7 @@ const Header = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter();
-    const { conversations, setConversations, recipientEmail, setRecipientEmail } = useConversations();
+    const { addConversation, setAddConversation } = useConversations();
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
@@ -34,14 +33,14 @@ const Header = () => {
         }
     };
 
-    const handleAdd = async () => {
-        try {
-
-        } catch (error) {
-
+    const handleAdd = async (event) => {
+        event.preventDefault();
+        if (addConversation) {
+            setAddConversation(false);
         }
-        const newConversations = conversations;
-        newConversations.push()
+        else {
+            setAddConversation(true);
+        }
     }
 
     return (
@@ -84,14 +83,7 @@ const Header = () => {
 
                         {/* Conversations list - scrollable */}
                         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-                            <ConversationList
-                                conversations={conversations}
-                                selectedRecipient={recipientEmail}
-                                onSelectConversation={(email) => {
-                                    setRecipientEmail(email);
-                                    toggleMobileMenu(); // Close drawer after selection
-                                }}
-                            />
+                            <ConversationList onSelectCallback={toggleMobileMenu} />
                         </Box>
 
                         <Divider />
@@ -125,7 +117,7 @@ const Header = () => {
                                 }
                             }}
                         >
-                            <AddIcon sx={{ color: "text.primary" }} />
+                            <AddIcon sx={{ color: "text.primary" }} onClick={handleAdd} />
                             <input
                                 type="file"
                                 hidden
@@ -177,7 +169,7 @@ const Header = () => {
                                 }
                             }}
                         >
-                            <AddIcon sx={{ color: "text.primary" }} />
+                            <AddIcon sx={{ color: "text.primary" }} onClick={handleAdd} />
                             <input
                                 type="file"
                                 hidden

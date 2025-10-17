@@ -28,7 +28,7 @@ function Page() {
     const messagesEndRef = useRef(null);
 
     // Use conversation context
-    const { conversations, setConversations, recipientEmail, setRecipientEmail } = useConversations();
+    const { conversations, setConversations, recipientEmail, setRecipientEmail, addConversation, setAddConversation } = useConversations();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -124,7 +124,7 @@ function Page() {
             if (!conversationMap.has(otherPerson)) {
                 conversationMap.set(otherPerson, {
                     recipientEmail: otherPerson,
-                    messages: []
+                    messages: [msg]
                 });
             }
 
@@ -210,11 +210,7 @@ function Page() {
                     bgcolor: "background.paper",
                     overflow: "auto"
                 }}>
-                    <ConversationList
-                        conversations={conversations}
-                        selectedRecipient={recipientEmail}
-                        onSelectConversation={setRecipientEmail}
-                    />
+                    <ConversationList />
                 </Box>
             )}
             {/* Main chat area - 5 parts */}

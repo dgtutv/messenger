@@ -14,6 +14,7 @@ export const useConversations = () => useContext(ConversationContext);
 export const ConversationProvider = ({ children }) => {
     const [conversations, setConversations] = useState([]);
     const [recipientEmail, setRecipientEmail] = useState('');
+    const [addConversation, setAddConversation] = useState(false);
 
     return (
         <ConversationContext.Provider
@@ -21,7 +22,9 @@ export const ConversationProvider = ({ children }) => {
                 conversations,
                 setConversations,
                 recipientEmail,
-                setRecipientEmail
+                setRecipientEmail,
+                addConversation,
+                setAddConversation
             }}
         >
             {children}
