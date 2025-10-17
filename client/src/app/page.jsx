@@ -199,6 +199,7 @@ function Page() {
     //Keyboard on phones?
     //Edit user, user image in convo
     //Upload images, emojis
+    //Same for admin, compare with old using all lowercase 
 
     return (
         <Box sx={{ display: "flex", width: "100%", height: "calc(99vh - 64px)", borderTop: 1, borderColor: "divider" }} >

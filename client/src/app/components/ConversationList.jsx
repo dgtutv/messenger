@@ -16,11 +16,15 @@ const ConversationList = ({ onSelectCallback, senderEmail }) => {
         if (newEmail === "" || !emailRegex.test(newEmail)) {
             return;
         }
-        // Check if conversation already exists
-        if (conversations.some(conv => conv.recipientEmail === newEmail)) {
-            // If exists, just switch to it
+        // Check if conversation already exists (case-insensitive)
+        const existingConv = conversations.find(conv =>
+            conv.recipientEmail.toLowerCase() === newEmail.toLowerCase()
+        );
+
+        if (existingConv) {
+            // If exists, switch to it using the exact case from the conversation
             setAddConversation(false);
-            setRecipientEmail(newEmail);
+            setRecipientEmail(existingConv.recipientEmail);
             setNewEmail("");
             if (onSelectCallback) onSelectCallback();
             return;
