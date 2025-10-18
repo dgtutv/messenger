@@ -100,6 +100,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.set('trust proxy', 1);
 
 // Session middleware with PostgreSQL store
 const sessionMiddleware = session({
@@ -114,7 +115,7 @@ const sessionMiddleware = session({
     cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: true,                    // Prevents client JS from reading cookie
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'none'
     }
 });
