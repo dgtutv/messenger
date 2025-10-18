@@ -245,7 +245,8 @@ app.post("/api/register", async (req, res) => {
         const codeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS);
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // Insert user with unverified status (store email as lowercase)
         await pool.query(
