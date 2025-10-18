@@ -10,12 +10,13 @@ const ConversationList = ({ onSelectCallback, senderEmail }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const handleNewConversation = () => {
-        //If no input, no work, if exists, redirect page no work
+    const handleNewConversation = async () => {
+        //If no input, no work, if exists, no work
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (newEmail === "" || !emailRegex.test(newEmail)) {
             return;
         }
+
         // Check if conversation already exists (case-insensitive)
         const existingConv = conversations.find(conv =>
             conv.recipientEmail.toLowerCase() === newEmail.toLowerCase()

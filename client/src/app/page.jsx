@@ -253,7 +253,7 @@ function Page() {
             }}>
                 {recipientEmail ? (
                     <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}>
-                        <Typography variant="h6">Messaging: {recipientName}</Typography>
+                        <Typography variant="h6">Messaging: {recipientName ? (<>{recipientName}</>) : (<>User does not exist yet.</>)}</Typography>
                         <Typography variant="caption" color="text.secondary">Their email: {recipientEmail}</Typography>
                     </Box>
                 ) : (
