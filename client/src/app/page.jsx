@@ -5,7 +5,6 @@ import { io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import { Typography, Box, useMediaQuery, useTheme, Card, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import ConversationList from './components/ConversationList';
 import { useConversations } from './contexts/ConversationContext';
 

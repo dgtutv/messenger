@@ -1,7 +1,7 @@
 "use client"
 import { Box } from '@mui/system'
 import { Paper, Typography, TextField, Button, Link } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function page() {
@@ -9,6 +9,49 @@ export default function page() {
     const [showDelete, setShowDelete] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
+
+    useEffect(() => {
+        // Fetch user data
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Not authenticated');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const userEmail = data.user.email;
+
+                setEmail(userEmail);
+                setName(data.user.name);
+
+                // Register user for direct messaging
+                if (socket) {
+                    socket.emit("register_user", userEmail);
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch user:', error);
+                // Only redirect on client side
+                if (typeof window !== 'undefined') {
+                    router.push('/sign-in');
+                }
+            });
+    }, [router]);
+
+    const handleDelete = async () => {
+        setShowDelete(!showDelete);
+        if (!showDelete) {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            })
+                .then(router.push("/register"))
+        }
+    }
 
     const formStyle = {
         width: "100%",
@@ -93,10 +136,27 @@ export default function page() {
                 )}
                 <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                     <Link href="/reset-password" sx={{ cursor: "pointer", color: 'primary.main' }}>Change password</Link>
-                    <Button variant='contained' color='error'>Delete</Button>
+                    {!showDelete && <Button variant='contained' color='error' onClick={handleDelete}>Delete</Button>}
                 </Box>
 
             </Paper>
+            {showDelete && <Paper
+                elevation={3}
+                sx={{
+                    padding: "32px",
+                    width: "100%",
+                    maxWidth: "448px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "40px"
+                }}
+            >
+                <Typography variant='h5'>Are you sure you want to delete? </Typography>
+                <Button fullWidth variant='contained' color='error' onClick={handleDelete}>Delete</Button>
+            </Paper>}
         </Box>
     )
 }

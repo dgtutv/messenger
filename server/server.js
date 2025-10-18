@@ -223,7 +223,12 @@ app.post("/api/user/change-username", async (req, res) => {
         console.log("Error fetching user", error);
         res.status(500).json({ error: "Internal error" });
     }
-})
+});
+
+app.post("/api/user/delete", async (req, res) => {
+    const userID = req.user.id;
+    await pool.query("DELETE FROM users WHERE id=$1", [userID]);
+});
 
 app.post("/api/register", async (req, res) => {
     try {
