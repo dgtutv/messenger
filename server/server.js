@@ -94,9 +94,11 @@ const io = new Server(server, {
 
 
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: "https://messenger-frontend-production.up.railway.app",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
 }));
+
 app.use(express.json());
 
 // Session middleware with PostgreSQL store
