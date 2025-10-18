@@ -202,6 +202,29 @@ app.post("/api/get-messages", async (req, res) => {
     }
 });
 
+app.post("/api/user/change-username", async (req, res) => {
+    try {
+        const { newUsername } = req.body;
+        if (!newUsername) {
+            return res.status(400).json({ error: "New username is required" });
+        }
+        const userID = req.user.id;
+        const result = await pool.query("UPDATE users SET name = $1 WHERE id = $2 RETURNING name", [newUsername, userID]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            username: result.rows[0].name
+        })
+    }
+    catch (error) {
+        console.log("Error fetching user", error);
+        res.status(500).json({ error: "Internal error" });
+    }
+})
+
 app.post("/api/register", async (req, res) => {
     try {
         const { name, email, password } = req.body;
