@@ -279,7 +279,7 @@ function Page() {
                                             borderRadius: "18px",
                                             borderBottomRightRadius: "4px"
                                         }}>
-                                            <Typography variant='body1' color="white" sx={{ wordBreak: "break-word" }}>
+                                            <Typography variant='body1' color="white" sx={{ wordBreak: "break-word", whiteSpace: 'pre-wrap' }}>
                                                 {message.content}
                                             </Typography>
                                         </Box>
@@ -293,7 +293,7 @@ function Page() {
                                             borderRadius: "18px",
                                             borderBottomLeftRadius: "4px"
                                         }}>
-                                            <Typography variant='body1' sx={{ wordBreak: "break-word" }}>
+                                            <Typography variant='body1' sx={{ wordBreak: "break-word", whiteSpace: 'pre-wrap' }}>
                                                 {message.content}
                                             </Typography>
                                         </Box>
