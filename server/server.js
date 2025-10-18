@@ -11,16 +11,6 @@ const pgSession = require('connect-pg-simple')(session);
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 
-//Image storage
-const multer = require("multer");
-const sharp = require("sharp");
-const path = require("path");
-const uploadDir = "./uploads";
-const fs = require("fs");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
 require('dotenv').config();
 
 // Email service
@@ -158,60 +148,18 @@ io.on("connection", (socket) => {
             const timestamp = new Date(data.timestamp);
 
             // Save to database with sender and recipient emails
-            const result = await pool.query(
-                "INSERT INTO messages (sender_email, recipient_email, content, time_sent) VALUES ($1, $2, $3, $4) RETURNING id",
+            await pool.query(
+                "INSERT INTO messages (sender_email, recipient_email, content, time_sent) VALUES ($1, $2, $3, $4)",
                 [data.senderEmail, data.recipientEmail, data.message, timestamp]
             );
 
-            const messageId = result.rows[0].id;
-            const imageUrls = [];
-
-            // Process images if any
-            if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-                for (const image of data.images) {
-                    try {
-                        // Extract base64 data (remove data:image/xxx;base64, prefix)
-                        const base64Data = image.data.replace(/^data:image\/\w+;base64,/, '');
-                        const buffer = Buffer.from(base64Data, 'base64');
-
-                        // Generate filename
-                        const filename = `${Date.now()}-${image.name}`;
-                        const filepath = path.join(uploadDir, filename);
-
-                        // Process and save image with sharp
-                        await sharp(buffer)
-                            .resize({ width: 1920, height: 1080, fit: "inside" })
-                            .toFile(filepath);
-
-                        const fileUrl = `/uploads/${filename}`;
-                        imageUrls.push(fileUrl);
-
-                        // Save to database
-                        await pool.query(
-                            "INSERT INTO message_images (message_id, url) VALUES ($1, $2)",
-                            [messageId, fileUrl]
-                        );
-                    } catch (imageError) {
-                        console.error("Error processing image:", imageError);
-                    }
-                }
-            }
-
-            // Emit to recipient with images
+            // Emit to recipient
             socket.to(data.recipientEmail).emit("receive_message", {
-                messageId: messageId,
                 senderEmail: data.senderEmail,
                 message: data.message,
                 timestamp: data.timestamp,
-                images: imageUrls
             });
 
-            // Confirm to sender
-            socket.emit("message_sent", {
-                messageId: messageId,
-                success: true,
-                images: imageUrls
-            });
 
         } catch (error) {
             console.error("Error sending message:", error);
@@ -597,11 +545,6 @@ app.get("/api/user", (req, res) => {
 
     });
 });
-
-// Serve static files
-app.use("/uploads", express.static("uploads"));
-
-app.post("api/upload", upload.array("images"))
 
 server.listen(PORT, () => {
     console.log(`Server started on port: ${PORT}`);

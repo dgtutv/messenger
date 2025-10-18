@@ -19,9 +19,3 @@ CREATE TABLE messages(
     time_sent TIMESTAMP,
     content TEXT
 );
-
-CREATE TABLE message_images (
-    id SERIAL PRIMARY KEY,
-    message_id INT NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
-    url TEXT NOT NULL
-);

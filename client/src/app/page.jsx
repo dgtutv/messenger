@@ -28,7 +28,6 @@ function Page() {
     const messagesEndRef = useRef(null);
     const [recipientName, setRecipientName] = useState("");
     const { conversations, setConversations, recipientEmail } = useConversations();
-    const [images, setImages] = useState([]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -192,34 +191,14 @@ function Page() {
 
             setMessages(prevMessages => [...prevMessages, newMessage]);
 
-            // Convert images to base64 if any
-            const imageData = [];
-            if (images.length > 0) {
-                for (const file of images) {
-                    const base64 = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(file);
-                    });
-                    imageData.push({
-                        data: base64,
-                        name: file.name,
-                        type: file.type
-                    });
-                }
-            }
-
-            // Send everything in one socket emit
             socket.emit("send_message", {
                 message,
                 senderEmail: email,
                 recipientEmail: recipientEmail,
                 timestamp: Date.now(),
-                images: imageData
             });
 
             setMessage("");
-            setImages([]);
         }
     }
 
@@ -340,32 +319,6 @@ function Page() {
                     alignItems: "flex-end",
                     gap: 1
                 }}>
-                    {/* Image upload button */}
-                    <IconButton
-                        component="label"
-                        sx={{
-                            color: 'primary.main',
-                            mb: 0.5,
-                            transition: 'all 0.2s ease-in-out',
-                            '&:hover': {
-                                bgcolor: 'action.hover',
-                                transform: 'scale(1.1)',
-                                color: 'primary.dark'
-                            }
-                        }}
-                    >
-                        <AddPhotoAlternateIcon />
-                        <input
-                            type="file"
-                            hidden
-                            accept="image/*"
-                            multiple
-                            onChange={(e) => {
-                                const files = Array.from(e.target.files);
-                                setImages((prev) => [...prev, ...files]);
-                            }}
-                        />
-                    </IconButton>
 
                     {/* Message input */}
                     <TextField
