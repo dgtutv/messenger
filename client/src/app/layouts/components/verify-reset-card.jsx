@@ -1,13 +1,10 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Paper, TextField, Button, Typography } from '@mui/material'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 const VerifyResetCard = () => {
-    const searchParams = useSearchParams();
-    const emailFromUrl = searchParams.get('email');
-
-    const [email, setEmail] = useState(emailFromUrl || "");
+    const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,6 +12,17 @@ const VerifyResetCard = () => {
     const [step, setStep] = useState(1); // 1: verify code, 2: set new password
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+
+    // Read email from query string on the client (avoid useSearchParams SSR bailout)
+    useEffect(() => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const emailFromUrl = params.get('email');
+            if (emailFromUrl) setEmail(emailFromUrl);
+        } catch (e) {
+            // ignore in non-browser environments
+        }
+    }, []);
 
     const formStyle = {
         width: "100%",
@@ -168,7 +176,7 @@ const VerifyResetCard = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         label="Email address"
                         variant='outlined'
-                        disabled={!!emailFromUrl}
+                        disabled={!!email}
                     />
                     <TextField
                         required

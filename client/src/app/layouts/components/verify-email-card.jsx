@@ -152,7 +152,7 @@ const VerifyEmailCard = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     label="Email address"
                     variant='outlined'
-                    disabled={!!emailFromUrl}
+                    disabled={!!email}
                 />
                 <TextField
                     required
