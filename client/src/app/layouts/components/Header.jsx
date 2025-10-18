@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
 import ConversationList from '../../components/ConversationList';
 import { useConversations } from '../../contexts/ConversationContext';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const Header = () => {
     const theme = useTheme();
@@ -121,6 +122,33 @@ const Header = () => {
                                 }
                             }}
                         >
+                            <AccountCircleIcon sx={{ color: "text.primary" }} onClick={(e) => {
+                                e.preventDefault();
+                                router.push('/account');
+                            }} />
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => {
+                                    // TODO: Handle image upload
+                                    console.log('Image selected:', e.target.files[0]);
+                                }}
+                            />
+                        </IconButton>
+                        <IconButton
+                            component="label"
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
                             <AddIcon sx={{ color: "text.primary" }} onClick={handleAdd} />
                             <input
                                 type="file"
@@ -160,6 +188,33 @@ const Header = () => {
                         Messenger
                     </Typography>
                     <Box component="nav">
+                        <IconButton
+                            component="label"
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <AccountCircleIcon sx={{ color: "text.primary" }} onClick={(e) => {
+                                e.preventDefault();
+                                router.push('/account');
+                            }} />
+                            <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                onChange={(e) => {
+                                    // TODO: Handle image upload
+                                    console.log('Image selected:', e.target.files[0]);
+                                }}
+                            />
+                        </IconButton>
                         <IconButton
                             component="label"
                             sx={{
