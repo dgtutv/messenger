@@ -49,7 +49,7 @@ passport.use(
                 const user = rows[0];
 
                 if (!user) {
-                    return done(null, false, { message: "Incorrect email" });
+                    return done(null, false, { message: "User does not exist." });
                 }
 
                 // Check if email is verified
