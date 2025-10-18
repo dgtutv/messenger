@@ -133,7 +133,7 @@ function Page() {
 
             if (!conversationMap.has(otherPerson)) {
                 conversationMap.set(otherPerson, {
-                    recipientEmail: otherPerson,
+                    recipientEmail: otherPerson.toLowerCase(),
                     messages: []
                 });
             }
