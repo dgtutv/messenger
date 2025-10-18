@@ -106,7 +106,10 @@ const Header = () => {
                         </Box>
 
                     </Drawer>
-                    <Typography variant="h5" component="h1" color="text.primary">
+                    <Typography variant="h5" component="h1" color="text.primary" onClick={(e) => {
+                        e.preventDefault();
+                        router.push('/');
+                    }}>
                         Messenger
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -185,7 +188,10 @@ const Header = () => {
                         margin: 0,
                     }}
                 >
-                    <Typography variant="h5" component="h1" color="text.primary">
+                    <Typography variant="h5" component="h1" color="text.primary" onClick={(e) => {
+                        e.preventDefault();
+                        router.push('/');
+                    }}>
                         Messenger
                     </Typography>
                     <Box component="nav">
