@@ -178,14 +178,17 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/api/home", (req, res) => {
+    console.log("[GET] /api/home called");
     res.json({ message: "Hello world!" });
 });
 
 app.post("/api/get-messages", async (req, res) => {
+    console.log("[POST] /api/get-messages called", req.body);
     try {
         const { userID } = req.body;
 
         if (!userID) {
+            console.log("[POST] /api/get-messages missing userID");
             return res.status(400).json({ error: "UserID is required" });
         }
 
@@ -194,17 +197,19 @@ app.post("/api/get-messages", async (req, res) => {
             [userID]
         );
 
+        console.log("[POST] /api/get-messages found messages:", rows);
         res.status(200).json({
             success: true,
             messages: rows
         });
     } catch (error) {
-        console.error('Error fetching messages:', error);
+        console.error('[POST] /api/get-messages error:', error);
         res.status(500).json({ error: "Failed to fetch messages. Please try again." });
     }
 });
 
 app.post("/api/user/change-username", async (req, res) => {
+    console.log("[POST] /api/user/change-username called", req.body);
     try {
         const { newUsername } = req.body;
         if (!newUsername) {
@@ -228,54 +233,69 @@ app.post("/api/user/change-username", async (req, res) => {
 });
 
 app.post("/api/user/delete", async (req, res) => {
+    console.log("[POST] /api/user/delete called", req.user);
     const userID = req.user.id;
     await pool.query("DELETE FROM users WHERE id=$1", [userID]);
 });
 
 app.post("/api/register", async (req, res) => {
+    console.log("[POST] /api/register called", req.body);
     try {
         const { name, email, password } = req.body;
+        console.log(`[REGISTER] Step 1: Received registration payload - Name: ${name}, Email: ${email}`);
 
-        // Check if user already exists
+        // Step 2: Check if user already exists
         const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
+        console.log(`[REGISTER] Step 2: Checked for existing user - Found: ${existingUser.rows.length}`);
         if (existingUser.rows.length > 0) {
+            console.log(`[REGISTER] Step 2: Email already registered for ${email}`);
             return res.status(400).json({ error: "Email already registered" });
         }
 
-        // Generate verification code
+        // Step 3: Generate verification code
         const verificationCode = generateVerificationCode();
         const codeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+        console.log(`[REGISTER] Step 3: Generated verification code ${verificationCode} (expires ${codeExpires})`);
 
-        // Hash password
+        // Step 4: Hash password
         const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS);
+        console.log(`[REGISTER] Step 4: Hashing password with saltRounds=${saltRounds}`);
         const hashedPassword = await bcrypt.hash(password, saltRounds);
+        console.log(`[REGISTER] Step 4: Password hashed successfully`);
 
-        // Insert user with unverified status (store email as lowercase)
+        // Step 5: Insert user into database
         await pool.query(
             "INSERT INTO users (name, email, password, email_verified, verification_code, verification_code_expires) VALUES ($1, $2, $3, $4, $5, $6)",
             [name, email.toLowerCase(), hashedPassword, false, verificationCode, codeExpires]
         );
+        console.log(`[REGISTER] Step 5: User inserted into database for ${email}`);
 
-        // Send verification email
+        // Step 6: Send verification email
+        console.log(`[REGISTER] Step 6: Sending verification email to ${email}`);
         const emailResult = await sendVerificationEmail(email, name, verificationCode);
+        console.log(`[REGISTER] Step 6: Email service result:`, emailResult);
 
         if (!emailResult.success) {
+            console.log(`[REGISTER] Step 6: Failed to send verification email to ${email}`);
             return res.status(500).json({ error: "Failed to send verification email" });
         }
 
+        // Step 7: Registration successful
+        console.log(`[REGISTER] Step 7: Registration successful for ${email}`);
         res.status(201).json({
             success: true,
             message: "Registration successful. Please check your email for verification code.",
             email: email  // Send back email so frontend knows where code was sent
         });
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('[REGISTER] Registration error:', error);
         res.status(500).json({ error: "Registration failed. Please try again." });
     }
 });
 
 // Request password reset (send verification code)
 app.post("/api/request-password-reset", async (req, res) => {
+    console.log("[POST] /api/request-password-reset called", req.body);
     try {
         const { email } = req.body;
 
@@ -321,6 +341,7 @@ app.post("/api/request-password-reset", async (req, res) => {
 
 // Verify reset code
 app.post("/api/verify-reset-code", async (req, res) => {
+    console.log("[POST] /api/verify-reset-code called", req.body);
     try {
         const { email, code } = req.body;
 
@@ -357,6 +378,7 @@ app.post("/api/verify-reset-code", async (req, res) => {
 
 // Reset password (after code verification)
 app.post("/api/reset-password", async (req, res) => {
+    console.log("[POST] /api/reset-password called", req.body);
     try {
         const { email, code, newPassword } = req.body;
 
@@ -407,6 +429,7 @@ app.post("/api/reset-password", async (req, res) => {
 
 // Verify email code
 app.post("/api/verify-email", async (req, res) => {
+    console.log("[POST] /api/verify-email called", req.body);
     try {
         const { email, code } = req.body;
 
@@ -454,6 +477,7 @@ app.post("/api/verify-email", async (req, res) => {
 
 // Resend verification code
 app.post("/api/resend-verification", async (req, res) => {
+    console.log("[POST] /api/resend-verification called", req.body);
     try {
         const { email } = req.body;
 
@@ -502,6 +526,7 @@ app.post("/api/resend-verification", async (req, res) => {
 });
 
 app.post("/api/login", (req, res, next) => {
+    console.log("[POST] /api/login called", req.body);
     passport.authenticate("local", (err, user, info) => {
         if (err) {
             return res.status(500).json({ error: "Internal server error" });
@@ -527,6 +552,7 @@ app.post("/api/login", (req, res, next) => {
 });
 
 app.post("/api/logout", (req, res) => {
+    console.log("[POST] /api/logout called");
     req.logout((err) => {
         if (err) {
             return res.status(500).json({ error: "Logout failed" });
@@ -536,6 +562,7 @@ app.post("/api/logout", (req, res) => {
 });
 
 app.get("/api/user", (req, res) => {
+    console.log("[GET] /api/user called");
     if (req.isAuthenticated()) {
         res.status(200).json({
             authenticated: true,
@@ -550,6 +577,7 @@ app.get("/api/user", (req, res) => {
     }
 
     app.post("/api/user/get-name", async (req, res) => {
+        console.log("[POST] /api/user/get-name called", req.body);
         try {
             const { email } = req.body;
 
