@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import ConversationList from '../../components/ConversationList';
 import { useConversations } from '../../contexts/ConversationContext';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ForumIcon from '@mui/icons-material/Forum';
 
 const Header = () => {
     const theme = useTheme();
@@ -112,6 +113,24 @@ const Header = () => {
                         <IconButton
                             onClick={(e) => {
                                 e.preventDefault();
+                                router.push('/');
+                            }}
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <ForumIcon sx={{ color: "text.primary" }} />
+                        </IconButton>
+                        <IconButton
+                            onClick={(e) => {
+                                e.preventDefault();
                                 router.push('/account');
                             }}
                             sx={{
@@ -170,6 +189,24 @@ const Header = () => {
                         Messenger
                     </Typography>
                     <Box component="nav">
+                        <IconButton
+                            onClick={(e) => {
+                                e.preventDefault();
+                                router.push('/');
+                            }}
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <ForumIcon sx={{ color: "text.primary" }} />
+                        </IconButton>
                         <IconButton
                             onClick={(e) => {
                                 e.preventDefault();

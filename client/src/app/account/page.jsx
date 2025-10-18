@@ -21,17 +21,6 @@ export default function page() {
                 }
                 return response.json();
             })
-            .then(data => {
-                const userEmail = data.user.email;
-
-                setEmail(userEmail);
-                setName(data.user.name);
-
-                // Register user for direct messaging
-                if (socket) {
-                    socket.emit("register_user", userEmail);
-                }
-            })
             .catch(error => {
                 console.error('Failed to fetch user:', error);
                 // Only redirect on client side
@@ -42,14 +31,16 @@ export default function page() {
     }, [router]);
 
     const handleDelete = async () => {
-        setShowDelete(!showDelete);
-        if (!showDelete) {
+        if (showDelete) {
             await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/delete`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             })
                 .then(router.push("/register"))
+        }
+        else {
+            setShowDelete(true);
         }
     }
 
