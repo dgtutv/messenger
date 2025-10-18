@@ -25,15 +25,15 @@ const ConversationList = ({ onSelectCallback, senderEmail }) => {
         if (existingConv) {
             // If exists, switch to it using the exact case from the conversation
             setAddConversation(false);
-            setRecipientEmail(existingConv.recipientEmail);
+            setRecipientEmail(existingConv.recipientEmail.toLowerCase());
             setNewEmail("");
             if (onSelectCallback) onSelectCallback();
             return;
         }
         // Create a new conversation with proper immutability
-        setConversations(prev => [...prev, { recipientEmail: newEmail, messages: [] }]);
+        setConversations(prev => [...prev, { recipientEmail: newEmail.toLowerCase(), messages: [] }]);
         setAddConversation(false);
-        setRecipientEmail(newEmail);
+        setRecipientEmail(newEmail.toLowerCase());
         setNewEmail("");
         if (onSelectCallback) onSelectCallback();
     }
