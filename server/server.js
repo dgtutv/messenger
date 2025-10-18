@@ -18,9 +18,9 @@ const { generateVerificationCode, sendVerificationEmail } = require('./services/
 
 
 const pool = new Pool({
-    user: process.env.USERNAME || 'postgres',
-    host: process.env.PGHOST || 'localhost',
-    database: process.env.DATABASE || 'mydb',
+    user: process.env.USERNAME,
+    host: process.env.PGHOST,
+    database: process.env.DATABASE,
     password: (() => {
         if (typeof process.env.PASSWORD !== 'string' || process.env.PASSWORD === '') {
             throw new Error('Environment variable PASSWORD must be set to a non-empty string');
