@@ -110,34 +110,10 @@ const Header = () => {
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <IconButton
-                            component="label"
-                            sx={{
-                                color: 'white',
-                                mb: 0.5,
-                                transition: 'all 0.2s ease-in-out',
-                                '&:hover': {
-                                    bgcolor: 'action.hover',
-                                    transform: 'scale(1.1)',
-                                    color: 'white'
-                                }
-                            }}
-                        >
-                            <AccountCircleIcon sx={{ color: "text.primary" }} onClick={(e) => {
+                            onClick={(e) => {
                                 e.preventDefault();
                                 router.push('/account');
-                            }} />
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={(e) => {
-                                    // TODO: Handle image upload
-                                    console.log('Image selected:', e.target.files[0]);
-                                }}
-                            />
-                        </IconButton>
-                        <IconButton
-                            component="label"
+                            }}
                             sx={{
                                 color: 'white',
                                 mb: 0.5,
@@ -149,16 +125,22 @@ const Header = () => {
                                 }
                             }}
                         >
-                            <AddIcon sx={{ color: "text.primary" }} onClick={handleAdd} />
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={(e) => {
-                                    // TODO: Handle image upload
-                                    console.log('Image selected:', e.target.files[0]);
-                                }}
-                            />
+                            <AccountCircleIcon sx={{ color: "text.primary" }} />
+                        </IconButton>
+                        <IconButton
+                            onClick={handleAdd}
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <AddIcon sx={{ color: "text.primary" }} />
                         </IconButton>
                         <IconButton
                             sx={{ zIndex: 1300, color: 'text.primary' }}
@@ -189,34 +171,10 @@ const Header = () => {
                     </Typography>
                     <Box component="nav">
                         <IconButton
-                            component="label"
-                            sx={{
-                                color: 'white',
-                                mb: 0.5,
-                                transition: 'all 0.2s ease-in-out',
-                                '&:hover': {
-                                    bgcolor: 'action.hover',
-                                    transform: 'scale(1.1)',
-                                    color: 'white'
-                                }
-                            }}
-                        >
-                            <AccountCircleIcon sx={{ color: "text.primary" }} onClick={(e) => {
+                            onClick={(e) => {
                                 e.preventDefault();
                                 router.push('/account');
-                            }} />
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={(e) => {
-                                    // TODO: Handle image upload
-                                    console.log('Image selected:', e.target.files[0]);
-                                }}
-                            />
-                        </IconButton>
-                        <IconButton
-                            component="label"
+                            }}
                             sx={{
                                 color: 'white',
                                 mb: 0.5,
@@ -228,16 +186,22 @@ const Header = () => {
                                 }
                             }}
                         >
-                            <AddIcon sx={{ color: "text.primary" }} onClick={handleAdd} />
-                            <input
-                                type="file"
-                                hidden
-                                accept="image/*"
-                                onChange={(e) => {
-                                    // TODO: Handle image upload
-                                    console.log('Image selected:', e.target.files[0]);
-                                }}
-                            />
+                            <AccountCircleIcon sx={{ color: "text.primary" }} />
+                        </IconButton>
+                        <IconButton
+                            onClick={handleAdd}
+                            sx={{
+                                color: 'white',
+                                mb: 0.5,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                    transform: 'scale(1.1)',
+                                    color: 'white'
+                                }
+                            }}
+                        >
+                            <AddIcon sx={{ color: "text.primary" }} />
                         </IconButton>
                         <Button variant='contained' onClick={handleLogout}>
                             Sign out

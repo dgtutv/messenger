@@ -2,7 +2,6 @@
 import React, { useState } from 'react'
 import { Paper, TextField, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 const LoginCard = () => {
     const [email, setEmail] = useState("");
