@@ -207,9 +207,33 @@ function Page() {
         return <div>Loading...</div>;
     }
 
-    //Keyboard on phones?
-    //Edit user, user image in convo
-    //Upload images, emojis
+    const displayDate = (timeSent) => {
+        const currDate = new Date();
+        const sentDate = new Date(timeSent);
+        console.log(currDate);
+        console.log(sentDate);
+        if (Math.abs(currDate.getTime() - sentDate.getTime()) < 24 * 60 * 60 * 1000) {
+            return (
+                new Date(timeSent).toLocaleString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                })
+            );
+        }
+        else {
+            return (
+                new Date(timeSent).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                })
+            );
+        }
+    }
 
     return (
         <Box sx={{ display: "flex", width: "100%", height: "calc(99vh - 64px)", borderTop: 1, borderColor: "divider" }} >
@@ -265,8 +289,9 @@ function Page() {
                                     key={index}
                                     sx={{
                                         display: "flex",
-                                        justifyContent: message.sender_email === email ? "flex-end" : "flex-start",
-                                        mb: 0.5
+                                        flexDirection: "column",
+                                        alignItems: message.sender_email === email ? "flex-end" : "flex-start",
+                                        mb: 1
                                     }}
                                 >
                                     {message.sender_email === email ? (
@@ -298,6 +323,13 @@ function Page() {
                                             </Typography>
                                         </Box>
                                     )}
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{ mt: 0.25, px: 0.5, fontSize: '0.7rem' }}
+                                    >
+                                        {displayDate(message.time_sent)}
+                                    </Typography>
                                 </Box>
                             ));
                         })()
