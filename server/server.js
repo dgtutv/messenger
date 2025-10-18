@@ -94,7 +94,7 @@ const io = new Server(server, {
 
 
 app.use(cors({
-    origin: "https://messenger-frontend-production.up.railway.app",
+    origin: process.env.CLIENT_URL,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
 }));
