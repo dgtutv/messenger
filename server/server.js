@@ -14,6 +14,7 @@ const LocalStrategy = require("passport-local").Strategy;
 //Image storage
 const multer = require("multer");
 const sharp = require("sharp");
+const path = require("path");
 const uploadDir = "./uploads";
 const fs = require("fs");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
@@ -152,20 +153,72 @@ io.on("connection", (socket) => {
     });
 
     socket.on("send_message", async (data) => {
-        // Convert JavaScript timestamp (milliseconds) to PostgreSQL timestamp
-        const timestamp = new Date(data.timestamp);
+        try {
+            // Convert JavaScript timestamp (milliseconds) to PostgreSQL timestamp
+            const timestamp = new Date(data.timestamp);
 
-        // Emit to recipient
-        socket.to(data.recipientEmail).emit("receive_message", {
-            senderEmail: data.senderEmail,
-            message: data.message,
-            timestamp: data.timestamp
-        });
+            // Save to database with sender and recipient emails
+            const result = await pool.query(
+                "INSERT INTO messages (sender_email, recipient_email, content, time_sent) VALUES ($1, $2, $3, $4) RETURNING id",
+                [data.senderEmail, data.recipientEmail, data.message, timestamp]
+            );
 
-        // Save to database with sender and recipient emails
-        await pool.query("INSERT INTO messages (sender_email, recipient_email, content, time_sent) VALUES ($1, $2, $3, $4)",
-            [data.senderEmail, data.recipientEmail, data.message, timestamp]
-        );
+            const messageId = result.rows[0].id;
+            const imageUrls = [];
+
+            // Process images if any
+            if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                for (const image of data.images) {
+                    try {
+                        // Extract base64 data (remove data:image/xxx;base64, prefix)
+                        const base64Data = image.data.replace(/^data:image\/\w+;base64,/, '');
+                        const buffer = Buffer.from(base64Data, 'base64');
+
+                        // Generate filename
+                        const filename = `${Date.now()}-${image.name}`;
+                        const filepath = path.join(uploadDir, filename);
+
+                        // Process and save image with sharp
+                        await sharp(buffer)
+                            .resize({ width: 1920, height: 1080, fit: "inside" })
+                            .toFile(filepath);
+
+                        const fileUrl = `/uploads/${filename}`;
+                        imageUrls.push(fileUrl);
+
+                        // Save to database
+                        await pool.query(
+                            "INSERT INTO message_images (message_id, url) VALUES ($1, $2)",
+                            [messageId, fileUrl]
+                        );
+                    } catch (imageError) {
+                        console.error("Error processing image:", imageError);
+                    }
+                }
+            }
+
+            // Emit to recipient with images
+            socket.to(data.recipientEmail).emit("receive_message", {
+                messageId: messageId,
+                senderEmail: data.senderEmail,
+                message: data.message,
+                timestamp: data.timestamp,
+                images: imageUrls
+            });
+
+            // Confirm to sender
+            socket.emit("message_sent", {
+                messageId: messageId,
+                success: true,
+                images: imageUrls
+            });
+
+        } catch (error) {
+            console.error("Error sending message:", error);
+            socket.emit("message_error", {
+                error: "Failed to send message"
+            });
+        }
     });
 });
 
@@ -516,37 +569,33 @@ app.get("/api/user", (req, res) => {
     } else {
         res.status(401).json({ authenticated: false });
     }
-});
 
-app.post("/upload", upload.array("images"), async (req, res) => {
-    const { message_id } = req.body;
-    const files = req.files;
+    app.post("/api/user/get-name", async (req, res) => {
+        try {
+            const { email } = req.body;
 
-    try {
-        const savedUrls = [];
+            if (!email) {
+                return res.status(400).json({ error: "recipient email is required" });
+            }
 
-        for (const file of files) {
-            const filename = `${Date.now()}-${file.originalname}`;
-            const filepath = path.join(uploadDir, filename);
+            const result = await pool.query("SELECT name FROM users WHERE email = $1", [email.toLowerCase()]);
 
-            await sharp(file.buffer)
-                .resize({ width: 1920, height: 1080, fit: "inside" })
-                .toFile(filepath);
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
 
-            const fileUrl = `/uploads/${filename}`;
-            savedUrls.push(fileUrl);
-
-            await pool.query(
-                `INSERT INTO message_images (message_id, image_url) VALUES ($1, $2)`,
-                [message_id, fileUrl]
-            );
+            res.status(200).json({
+                success: true,
+                username: result.rows[0].name
+            })
+        }
+        catch (error) {
+            console.log("Error fetching username", error);
+            res.status(500).json({ error: "Internal error" });
         }
 
-        res.json({ success: true, images: savedUrls });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Upload failed" });
-    }
+
+    });
 });
 
 // Serve static files

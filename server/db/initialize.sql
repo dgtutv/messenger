@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS message_images CASCADE;
 
 CREATE TABLE users(
     id   SERIAL PRIMARY KEY,
@@ -22,5 +23,5 @@ CREATE TABLE messages(
 CREATE TABLE message_images (
     id SERIAL PRIMARY KEY,
     message_id INT NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
-    url TEXT NOT NULL,
-)
+    url TEXT NOT NULL
+);

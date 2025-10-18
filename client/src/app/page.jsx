@@ -28,6 +28,8 @@ function Page() {
     const messagesEndRef = useRef(null);
     const [recipientName, setRecipientName] = useState("");
     const { conversations, setConversations, recipientEmail } = useConversations();
+    const [images, setImages] = useState([]);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -41,7 +43,6 @@ function Page() {
         })
             .then(res => res.json())
             .then(data => setRecipientName(data.username))
-            .then(() => { console.log(recipientName) })
             .catch(err => console.error("Failed to fetch username:", err))
     }, [recipientEmail]);
 
@@ -180,7 +181,7 @@ function Page() {
             });
     }, [router]);
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (socket && message && recipientEmail) {
             const newMessage = {
                 sender_email: email,
@@ -191,15 +192,34 @@ function Page() {
 
             setMessages(prevMessages => [...prevMessages, newMessage]);
 
-            // Send to server
+            // Convert images to base64 if any
+            const imageData = [];
+            if (images.length > 0) {
+                for (const file of images) {
+                    const base64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(file);
+                    });
+                    imageData.push({
+                        data: base64,
+                        name: file.name,
+                        type: file.type
+                    });
+                }
+            }
+
+            // Send everything in one socket emit
             socket.emit("send_message", {
                 message,
                 senderEmail: email,
                 recipientEmail: recipientEmail,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                images: imageData
             });
 
-            setMessage(""); // Clear input after sending
+            setMessage("");
+            setImages([]);
         }
     }
 
@@ -339,9 +359,10 @@ function Page() {
                             type="file"
                             hidden
                             accept="image/*"
+                            multiple
                             onChange={(e) => {
-                                // TODO: Handle image upload
-                                console.log('Image selected:', e.target.files[0]);
+                                const files = Array.from(e.target.files);
+                                setImages((prev) => [...prev, ...files]);
                             }}
                         />
                     </IconButton>
